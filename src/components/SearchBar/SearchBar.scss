@@ -1,0 +1,58 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.search-bar {
+  position: relative;
+  width: 100%;
+
+  .search-input-wrapper {
+    position: relative;
+    width: 100%;
+
+    .search-icon {
+      position: absolute;
+      left: $spacing-md;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-color;
+      opacity: 0.5;
+    }
+
+    input {
+      @include input-field;
+      padding-left: $spacing-xl * 1.5;
+      
+      &:focus {
+        border-color: $primary-color;
+        
+        & + .search-icon {
+          color: $primary-color;
+        }
+      }
+    }
+  }
+
+  .search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: rgba($secondary-color, 0.95);
+    border: 1px solid $border-color;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+
+    .suggestion-item {
+      padding: $spacing-sm $spacing-md;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: rgba($primary-color, 0.1);
+      }
+    }
+  }
+} 

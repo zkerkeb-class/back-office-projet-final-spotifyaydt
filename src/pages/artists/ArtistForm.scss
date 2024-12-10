@@ -1,0 +1,91 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.artist-form {
+  background-color: rgba($secondary-color, 0.3);
+  border-radius: 8px;
+  padding: $spacing-xl;
+
+  h2 {
+    margin-bottom: $spacing-xl;
+    color: $text-color;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .form-group {
+    @include flex(column);
+    gap: $spacing-sm;
+
+    label {
+      color: $text-color;
+      font-weight: 500;
+    }
+
+    input, textarea, select {
+      @include input-field;
+
+      &.error {
+        border-color: $error-color;
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .error-message {
+      color: $error-color;
+      font-size: 0.875rem;
+    }
+  }
+
+  .genres-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: $spacing-sm;
+
+    .genre-checkbox {
+      @include flex(row, flex-start, center);
+      gap: $spacing-xs;
+      cursor: pointer;
+
+      input {
+        width: auto;
+      }
+
+      span {
+        color: $text-color;
+      }
+    }
+  }
+
+  .social-links {
+    @include flex(column);
+    gap: $spacing-sm;
+  }
+
+  .form-actions {
+    margin-top: $spacing-xl;
+    @include flex(row, flex-end);
+  }
+}
+
+.btn {
+  @include button;
+
+  &--primary {
+    @include flex(row, center, center);
+    gap: $spacing-sm;
+  }
+} 

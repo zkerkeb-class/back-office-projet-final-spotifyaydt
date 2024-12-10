@@ -1,0 +1,125 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.album-form {
+  background-color: rgba($secondary-color, 0.3);
+  border-radius: 8px;
+  padding: $spacing-xl;
+
+  h2 {
+    margin-bottom: $spacing-xl;
+    color: $text-color;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+  }
+
+  .form-group {
+    @include flex(column);
+    gap: $spacing-sm;
+
+    label {
+      color: $text-color;
+      font-weight: 500;
+    }
+
+    input, select {
+      @include input-field;
+
+      &.error {
+        border-color: $error-color;
+      }
+    }
+
+    .error-message {
+      color: $error-color;
+      font-size: 0.875rem;
+    }
+  }
+
+  .artwork-upload {
+    .upload-zone {
+      border: 2px dashed $border-color;
+      border-radius: 8px;
+      padding: $spacing-lg;
+      text-align: center;
+
+      input[type="file"] {
+        display: none;
+      }
+
+      .upload-label {
+        cursor: pointer;
+        color: $primary-color;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  .tracks-section {
+    margin-top: $spacing-xl;
+
+    .tracks-header {
+      @include flex(row, space-between, center);
+      margin-bottom: $spacing-lg;
+
+      h3 {
+        margin: 0;
+        color: $text-color;
+      }
+    }
+
+    .tracks-list {
+      @include flex(column);
+      gap: $spacing-md;
+    }
+
+    .track-item {
+      @include flex(row, flex-start, center);
+      gap: $spacing-md;
+      background-color: rgba($secondary-color, 0.5);
+      padding: $spacing-md;
+      border-radius: 4px;
+
+      .drag-handle {
+        color: $border-color;
+        cursor: grab;
+        
+        &:active {
+          cursor: grabbing;
+        }
+      }
+
+      input {
+        @include input-field;
+        flex: 1;
+      }
+    }
+  }
+
+  .form-actions {
+    margin-top: $spacing-xl;
+    @include flex(row, flex-end);
+  }
+}
+
+.btn {
+  @include button;
+
+  &--secondary {
+    @include button(transparent, $primary-color);
+    border: 1px solid $primary-color;
+  }
+
+  &--icon {
+    @include button(transparent);
+    padding: $spacing-xs;
+  }
+} 

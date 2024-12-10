@@ -1,0 +1,70 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.track-list {
+  @include flex(column);
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.track-item {
+  @include flex(row, flex-start, center);
+  gap: $spacing-md;
+  background-color: rgba($secondary-color, 0.3);
+  padding: $spacing-md;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &.dragging {
+    background-color: rgba($primary-color, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .drag-handle {
+    color: $border-color;
+    cursor: grab;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .track-number {
+    width: 24px;
+    text-align: center;
+    color: $text-color;
+    opacity: 0.7;
+  }
+
+  .track-title {
+    @include input-field;
+    flex: 1;
+  }
+
+  .track-duration {
+    @include flex(row, flex-start, center);
+    gap: $spacing-xs;
+    color: $text-color;
+    opacity: 0.7;
+
+    input {
+      @include input-field;
+      width: 60px;
+      text-align: center;
+    }
+  }
+
+  .remove-track {
+    color: $error-color;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  &:hover .remove-track {
+    opacity: 1;
+  }
+} 
