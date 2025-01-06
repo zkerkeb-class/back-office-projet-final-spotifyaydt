@@ -1,56 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { useQuery } from '@tanstack/react-query';
 import { phoneticSearch } from '../../services/phoneticSearch';
+import { api } from '../../services/api';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import './ArtistList.scss';
+import { ErrorState } from '../../components/ErrorState/ErrorState';
 
 function ArtistList() {
   const navigate = useNavigate();
-  const [filteredArtists, setFilteredArtists] = useState([]);
-  const [artists, setArtists] = useState([
-    {
-      id: 1,
-      name: 'Artiste Example',
-      genres: ['Pop', 'Rock'],
-      socialLinks: ['Spotify', 'Instagram'],
-      image: 'https://picsum.photos/50/50',
-    },
-    {
-      id: 2,
-      name: 'Exemple de Musique',
-      genres: ['Jazz', 'Blues'],
-      socialLinks: ['Spotify'],
-      image: 'https://picsum.photos/50/50',
-    },
-    {
-      id: 3,
-      name: 'Exemplaire',
-      genres: ['Classique'],
-      socialLinks: ['Instagram'],
-      image: 'https://picsum.photos/50/50',
-    },
-    {
-      id: 4,
-      name: 'Test Artist',
-      genres: ['Pop'],
-      socialLinks: ['Twitter'],
-      image: 'https://picsum.photos/50/50',
-    }
-  ]);
+  const [searchResults, setSearchResults] = React.useState(null);
+
+  const { data: artists, isLoading, error, refetch } = useQuery({
+    queryKey: ['artists'],
+    queryFn: () => api.get('/artists'),
+    retry: 2,
+    staleTime: 30000, // 30 secondes
+    refetchOnWindowFocus: false,
+  });
 
   const handleSearch = (query) => {
     if (!query || query.trim() === '') {
-      setFilteredArtists(artists);
+      setSearchResults(null);
       return;
     }
     const results = phoneticSearch(query.trim(), artists, 'name', 0.3);
-    setFilteredArtists(results);
+    setSearchResults(results);
   };
 
-  useEffect(() => {
-    setFilteredArtists(artists);
-  }, [artists]);
+  const displayedArtists = searchResults || artists || [];
+
+  if (isLoading) return (
+    <div className="loading-state">
+      <div className="spinner"></div>
+      <p>Chargement des artistes...</p>
+    </div>
+  );
+
+  if (error) return <ErrorState error={error} onRetry={refetch} />;
 
   return (
     <div className="artist-list">
@@ -76,28 +64,22 @@ function ArtistList() {
         <table>
           <thead>
             <tr>
-              <th style={{ width: '60px' }}></th>
               <th>Nom</th>
-              <th>Genres</th>
-              <th>Réseaux sociaux</th>
+              <th>Genre</th>
+              <th>Popularité</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredArtists.map(artist => (
-              <tr key={artist.id}>
-                <td className="image-cell">
-                  <div className="artist-image">
-                    <img src={artist.image} alt={artist.name} />
-                  </div>
-                </td>
+            {displayedArtists.map(artist => (
+              <tr key={artist._id}>
                 <td>{artist.name}</td>
-                <td>{artist.genres.join(', ')}</td>
-                <td>{artist.socialLinks.join(', ')}</td>
+                <td>{artist.genre}</td>
+                <td>{artist.popularity}%</td>
                 <td className="actions">
                   <button 
                     className="btn btn--icon"
-                    onClick={() => navigate(`/artists/edit/${artist.id}`)}
+                    onClick={() => navigate(`/artists/edit/${artist._id}`)}
                   >
                     <FaEdit />
                   </button>
