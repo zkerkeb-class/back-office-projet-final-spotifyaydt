@@ -2,51 +2,97 @@
 @import '../../styles/mixins';
 
 .layout {
-  @include flex;
+  display: flex;
   min-height: 100vh;
-  background-color: $background-color;
-  color: $text-color;
 }
 
 .sidebar {
   width: 250px;
   background-color: $secondary-color;
   padding: $spacing-lg;
-  
+  box-shadow: $box-shadow;
+
   &__logo {
     margin-bottom: $spacing-xl;
-    
+    padding-bottom: $spacing-lg;
+    border-bottom: 1px solid rgba($text-color, 0.1);
+
     h1 {
-      font-size: 1.5rem;
       color: $primary-color;
+      font-size: $font-size-xl;
+      margin: 0;
+      text-align: center;
     }
   }
-  
+
   &__menu {
     list-style: none;
     padding: 0;
     margin: 0;
-  }
-  
-  &__link {
-    @include flex(row, flex-start, center);
-    padding: $spacing-md;
-    color: $text-color;
-    text-decoration: none;
-    gap: $spacing-md;
-    
-    &:hover {
-      background-color: rgba($primary-color, 0.1);
-    }
-    
-    svg {
-      font-size: 1.2rem;
+
+    li {
+      margin-bottom: $spacing-sm;
+      border-radius: $border-radius;
+      transition: all $transition-duration ease;
+
+      &.active {
+        background-color: rgba($primary-color, 0.1);
+        
+        a {
+          color: $primary-color;
+        }
+      }
+
+      &:hover {
+        background-color: rgba($primary-color, 0.05);
+      }
+
+      a {
+        @include flex(row, flex-start, center);
+        padding: $spacing-md;
+        color: $text-color;
+        text-decoration: none;
+        gap: $spacing-md;
+        transition: all $transition-duration ease;
+
+        svg {
+          font-size: $font-size-lg;
+          opacity: 0.8;
+        }
+
+        span {
+          font-size: $font-size-md;
+        }
+
+        &:hover {
+          color: $primary-color;
+        }
+      }
     }
   }
 }
 
-.main-content {
+.content {
   flex: 1;
   padding: $spacing-xl;
+  background-color: $background-color;
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba($secondary-color, 0.1);
+    border-radius: $border-radius;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba($secondary-color, 0.3);
+    border-radius: $border-radius;
+
+    &:hover {
+      background: rgba($secondary-color, 0.5);
+    }
+  }
 } 
