@@ -11,9 +11,34 @@
     }
   }
 
+  &__controls {
+    @include flex(row, flex-end, center);
+    gap: $spacing-lg;
+  }
+
   &__refresh {
-    font-size: $font-size-sm;
     color: rgba($text-color, 0.6);
+    font-size: $font-size-sm;
+  }
+
+  &__config-btn {
+    @include flex(row, center, center);
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: rgba($primary-color, 0.1);
+    border: none;
+    border-radius: $border-radius;
+    color: $primary-color;
+    cursor: pointer;
+    transition: all $transition-duration ease;
+
+    &:hover {
+      background: rgba($primary-color, 0.2);
+    }
+
+    svg {
+      font-size: $font-size-md;
+    }
   }
 
   &__metrics-grid {
@@ -21,12 +46,64 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: $spacing-lg;
     margin-bottom: $spacing-xl;
+    min-height: 200px;
+  }
+}
+
+// Ajout d'un overlay pour la modale
+.kpi-config {
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
   }
 
-  &__charts {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-lg;
-    margin-top: $spacing-xl;
+  // La modale elle-même
+  > div {
+    position: relative;
+    z-index: 999;
+  }
+}
+
+.metrics-card-wrapper {
+  position: relative;
+  transition: transform 0.2s ease;
+
+  .drag-handle {
+    position: absolute;
+    top: $spacing-sm;
+    right: $spacing-sm;
+    cursor: move;
+    color: rgba($text-color, 0.3);
+    font-size: $font-size-lg;
+    z-index: 1;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: rgba($text-color, 0.6);
+    }
+  }
+  
+  &.is-dragging {
+    .metrics-card {
+      transform: scale(1.02);
+      box-shadow: $box-shadow-lg;
+    }
+  }
+}
+
+// Styles pour le drag & drop
+.metrics-card {
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+  
+  &:active {
+    cursor: grabbing;
   }
 } 
