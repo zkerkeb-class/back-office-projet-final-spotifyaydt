@@ -1,0 +1,133 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.image-manager {
+  width: 100%;
+
+  .error-message {
+    color: $error-color;
+    margin-bottom: $spacing-md;
+    padding: $spacing-sm;
+    background-color: rgba($error-color, 0.1);
+    border-radius: 4px;
+  }
+
+  .image-preview {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: rgba($secondary-color, 0.3);
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .upload-zone {
+      @include flex(column, center, center);
+      height: 200px;
+      gap: $spacing-md;
+      cursor: pointer;
+      border: 2px dashed $border-color;
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: $primary-color;
+        background-color: rgba($primary-color, 0.1);
+      }
+
+      svg {
+        font-size: 2rem;
+        color: $border-color;
+      }
+
+      p {
+        margin: 0;
+        color: $text-color;
+      }
+
+      .upload-button {
+        @include button($primary-color, $text-color);
+      }
+    }
+
+    .image-actions {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: $spacing-md;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+      @include flex(row, flex-end, center);
+      gap: $spacing-md;
+
+      .action-button {
+        @include button(rgba($secondary-color, 0.8), $text-color);
+        @include flex(row, center, center);
+        gap: $spacing-xs;
+        padding: $spacing-xs $spacing-md;
+
+        &.delete {
+          background-color: rgba($error-color, 0.8);
+
+          &:hover {
+            background-color: $error-color;
+          }
+        }
+
+        svg {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}
+
+// Styles pour react-image-crop
+.ReactCrop {
+  position: relative;
+  max-height: 400px;
+  background-color: #000;
+
+  &__crop-selection {
+    border: 1px solid $primary-color;
+    border-image: none;
+    border-radius: 0;
+    box-shadow: 0 0 0 9999em rgba(0, 0, 0, 0.5);
+  }
+
+  &__drag-handle {
+    background-color: $primary-color;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid #fff;
+  }
+
+  &__drag-bar {
+    background-color: $primary-color;
+  }
+
+  &__drag-handle.ord-n,
+  &__drag-handle.ord-s {
+    margin-left: -5px;
+    margin-top: -5px;
+  }
+
+  &__drag-handle.ord-e,
+  &__drag-handle.ord-w {
+    margin-top: -5px;
+    margin-left: -5px;
+  }
+
+  &__drag-handle.ord-nw,
+  &__drag-handle.ord-ne,
+  &__drag-handle.ord-sw,
+  &__drag-handle.ord-se {
+    margin-top: -5px;
+    margin-left: -5px;
+  }
+} 

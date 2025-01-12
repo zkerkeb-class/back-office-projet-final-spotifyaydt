@@ -8,29 +8,37 @@
     }
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.62.16",
     "axios": "^1.6.7",
     "formik": "^2.4.6",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-icons": "^5.4.0",
+    "react-image-crop": "^10.1.8",
     "react-router-dom": "^6.28.0",
     "react-scripts": "5.0.1",
     "sass": "^1.82.0",
     "yup": "^1.5.0"
   },
   "devDependencies": {
+    "@testing-library/cypress": "^10.0.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "husky": "^8.0.3"
+    "cypress": "^13.16.1",
+    "husky": "^8.0.3",
+    "start-server-and-test": "^2.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --watchAll=false --passWithNoTests",
     "eject": "react-scripts eject",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "start-server-and-test start http://localhost:3000 cypress:run"
   },
   "browserslist": {
     "production": [

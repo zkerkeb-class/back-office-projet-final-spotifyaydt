@@ -1,0 +1,18 @@
+{
+  "testAlbum": {
+    "title": "Test Album",
+    "artist": "Test Artist",
+    "releaseDate": "2024-01-01",
+    "genre": "pop",
+    "tracks": [
+      {
+        "title": "Track 1",
+        "duration": "3:30"
+      },
+      {
+        "title": "Track 2",
+        "duration": "4:15"
+      }
+    ]
+  }
+} 

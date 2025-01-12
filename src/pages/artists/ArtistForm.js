@@ -2,7 +2,7 @@ import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { FaPlus } from 'react-icons/fa';
-import ImageUpload from '../../components/ImageUpload/ImageUpload';
+import ImageManager from '../../components/ImageManager/ImageManager';
 import './ArtistForm.scss';
 
 const validationSchema = Yup.object({
@@ -30,6 +30,10 @@ function ArtistForm() {
     },
   });
 
+  const handleImageChange = (imageData) => {
+    setArtistImage(imageData);
+  };
+
   return (
     <div className="artist-form">
       <h2>Nouvel Artiste</h2>
@@ -37,10 +41,12 @@ function ArtistForm() {
       <form onSubmit={formik.handleSubmit}>
         <div className="form-grid">
           <div className="form-group full-width">
-            <ImageUpload
+            <ImageManager
               label="Photo de l'artiste"
-              onImageChange={setArtistImage}
+              onImageChange={handleImageChange}
               initialImage={null}
+              aspectRatio={1}
+              generateThumbnail={true}
             />
           </div>
           <div className="form-group">
