@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { useQuery } from '@tanstack/react-query';
+import { phoneticSearch } from '../../services/phoneticSearch';
+import { api } from '../../services/api';
+import SearchBar from '../../components/SearchBar/SearchBar';
+import { ErrorState } from '../../components/ErrorState/ErrorState';
 import './AlbumList.scss';
 
 function AlbumList() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = React.useState(null);
 
-  // Exemple de données avec images (à remplacer par les données réelles)
-  const albums = [
-    {
-      id: 1,
-      title: 'Album Example',
-      artist: 'Artiste Example',
-      releaseDate: '2024-01-01',
-      tracks: 12,
-      cover: 'https://picsum.photos/50/50', // URL exemple
+  const { data: albums, isLoading, error, refetch } = useQuery({
+    queryKey: ['albums'],
+    queryFn: () => api.get('/albums'),
+    retry: 2,
+    staleTime: 30000, // 30 secondes
+    refetchOnWindowFocus: false,
+  });
+
+  const handleSearch = (query) => {
+    if (!query || query.trim() === '') {
+      setSearchResults(null);
+      return;
     }
-  ];
+    const results = phoneticSearch(query.trim(), albums, 'title', 0.3);
+    setSearchResults(results);
+  };
+
+  const displayedAlbums = searchResults || albums || [];
+
+  if (isLoading) return (
+    <div className="loading-state">
+      <div className="spinner"></div>
+      <p>Chargement des albums...</p>
+    </div>
+  );
+
+  if (error) return <ErrorState error={error} onRetry={refetch} />;
 
   return (
     <div className="album-list">
@@ -33,11 +54,9 @@ function AlbumList() {
       </div>
       
       <div className="album-list__search">
-        <input
-          type="text"
+        <SearchBar
           placeholder="Rechercher un album..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onSearch={handleSearch}
         />
       </div>
 
@@ -48,33 +67,35 @@ function AlbumList() {
               <th style={{ width: '60px' }}></th>
               <th>Titre</th>
               <th>Artiste</th>
+              <th>Genre</th>
               <th>Date de sortie</th>
               <th>Pistes</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {albums.map(album => (
-              <tr key={album.id}>
+            {displayedAlbums.map(album => (
+              <tr key={album._id}>
                 <td className="image-cell">
                   <div className="album-cover">
-                    <img src={album.cover} alt={album.title} />
+                    <img src={album.coverImage} alt={album.title} />
                   </div>
                 </td>
                 <td>{album.title}</td>
-                <td>{album.artist}</td>
+                <td>{album.artist.name}</td>
+                <td>{album.genre}</td>
                 <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
-                <td>{album.tracks}</td>
+                <td>{album.tracks.length}</td>
                 <td className="actions">
                   <button 
                     className="btn btn--icon"
-                    onClick={() => navigate(`/albums/edit/${album.id}`)}
+                    onClick={() => navigate(`/albums/edit/${album._id}`)}
                   >
                     <FaEdit />
                   </button>
                   <button 
                     className="btn btn--icon btn--danger"
-                    onClick={() => console.log('delete')}
+                    onClick={() => console.log('delete', album._id)}
                   >
                     <FaTrash />
                   </button>
