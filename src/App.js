@@ -1,10 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import ArtistList from './pages/artists/ArtistList';
 import ArtistForm from './pages/artists/ArtistForm';
 import AlbumList from './pages/albums/AlbumList';
 import AlbumForm from './pages/albums/AlbumForm';
+import Dashboard from './pages/dashboard/Dashboard';
 import './styles/global.scss';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -15,6 +16,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Layout>
         <Routes>
+          <Route path="/" element={<Navigate to="/metrics" replace />} />
+          <Route path="/metrics" element={<Dashboard />} />
           <Route path="/artists" element={<ArtistList />} />
           <Route path="/artists/new" element={<ArtistForm />} />
           <Route path="/artists/edit/:id" element={<ArtistForm />} />

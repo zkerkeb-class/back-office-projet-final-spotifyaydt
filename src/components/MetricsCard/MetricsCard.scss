@@ -1,0 +1,59 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.metrics-card {
+  background: rgba($secondary-color, 0.3);
+  border-radius: $border-radius;
+  padding: $spacing-lg;
+  @include flex(row, flex-start, center);
+  gap: $spacing-lg;
+  transition: all $transition-duration ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $box-shadow-lg;
+  }
+
+  &--alert {
+    background: rgba($error-color, 0.1);
+    border: 1px solid rgba($error-color, 0.3);
+  }
+
+  &__icon {
+    font-size: $font-size-xl * 1.5;
+    opacity: 0.8;
+  }
+
+  &__content {
+    flex: 1;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    color: rgba($text-color, 0.8);
+    margin: 0 0 $spacing-xs;
+  }
+
+  &__value {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    @include flex(row, flex-start, center);
+    gap: $spacing-sm;
+  }
+
+  &__trend {
+    font-size: $font-size-sm;
+    @include flex(row, flex-start, center);
+    gap: $spacing-xs;
+
+    .trend-icon {
+      &--up {
+        color: $primary-color;
+      }
+
+      &--down {
+        color: $error-color;
+      }
+    }
+  }
+} 

@@ -1,0 +1,32 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.dashboard {
+  &__header {
+    @include flex(row, space-between, center);
+    margin-bottom: $spacing-xl;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  &__refresh {
+    font-size: $font-size-sm;
+    color: rgba($text-color, 0.6);
+  }
+
+  &__metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+  }
+
+  &__charts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-lg;
+    margin-top: $spacing-xl;
+  }
+} 
