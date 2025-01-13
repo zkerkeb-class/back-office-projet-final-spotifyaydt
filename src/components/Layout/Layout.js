@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaMusic, FaUser, FaChartLine } from 'react-icons/fa';
+import { FaMusic, FaUser, FaChartLine, FaWifi } from 'react-icons/fa';
+import { useOfflineMode } from '../../hooks/useOfflineMode';
 import './Layout.scss';
 
 function Layout({ children }) {
   const location = useLocation();
+  const { isOnline } = useOfflineMode();
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
@@ -12,6 +14,12 @@ function Layout({ children }) {
 
   return (
     <div className="layout">
+      {!isOnline && (
+        <div className="offline-banner">
+          <FaWifi />
+          Mode hors ligne • Les modifications seront synchronisées automatiquement
+        </div>
+      )}
       <nav className="sidebar">
         <div className="sidebar__logo">
           <h1>Spotify Admin</h1>

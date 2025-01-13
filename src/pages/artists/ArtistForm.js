@@ -4,29 +4,48 @@ import * as Yup from 'yup';
 import { FaPlus } from 'react-icons/fa';
 import ImageManager from '../../components/ImageManager/ImageManager';
 import './ArtistForm.scss';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../../services/api';
 
 const validationSchema = Yup.object({
-  name: Yup.string().required('Le nom est requis'),
-  biography: Yup.string().required('La biographie est requise'),
-  genres: Yup.array().min(1, 'Sélectionnez au moins un genre'),
+  name: Yup.string()
+    .required('Le nom est requis')
+    .min(2, 'Le nom doit contenir au moins 2 caractères'),
+  description: Yup.string()
+    .required('La description est requise')
+    .min(10, 'La description doit contenir au moins 10 caractères'),
+  genre: Yup.string()
+    .required('Le genre est requis')
+    .min(2, 'Le genre doit contenir au moins 2 caractères'),
 });
 
 function ArtistForm() {
   const [artistImage, setArtistImage] = React.useState(null);
+  const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       name: '',
-      biography: '',
-      genres: [],
-      socialLinks: {
-        spotify: '',
-        instagram: '',
-        twitter: '',
-      },
+      description: '',
+      genre: '',
+      popularity: 0,
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log({ ...values, image: artistImage });
+    onSubmit: async (values) => {
+      try {
+        const artistData = {
+          ...values,
+          image: artistImage,
+          popularity: 0, // Force à 0 pour la création
+        };
+        
+        const response = await api.post('/artists', artistData);
+        if (response) {
+          // Redirection vers la liste des artistes après création
+          navigate('/artists');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la création:', error);
+      }
     },
   });
 
@@ -49,6 +68,7 @@ function ArtistForm() {
               generateThumbnail={true}
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="name">Nom de l'artiste</label>
             <input
@@ -57,6 +77,7 @@ function ArtistForm() {
               type="text"
               value={formik.values.name}
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               className={formik.errors.name && formik.touched.name ? 'error' : ''}
             />
             {formik.errors.name && formik.touched.name && (
@@ -65,66 +86,35 @@ function ArtistForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="biography">Biographie</label>
+            <label htmlFor="description">Description</label>
             <textarea
-              id="biography"
-              name="biography"
+              id="description"
+              name="description"
               rows="4"
-              value={formik.values.biography}
+              value={formik.values.description}
               onChange={formik.handleChange}
-              className={formik.errors.biography && formik.touched.biography ? 'error' : ''}
+              onBlur={formik.handleBlur}
+              className={formik.errors.description && formik.touched.description ? 'error' : ''}
             />
-            {formik.errors.biography && formik.touched.biography && (
-              <span className="error-message">{formik.errors.biography}</span>
+            {formik.errors.description && formik.touched.description && (
+              <span className="error-message">{formik.errors.description}</span>
             )}
           </div>
 
           <div className="form-group">
-            <label>Genres</label>
-            <div className="genres-list">
-              {['Pop', 'Rock', 'Hip-Hop', 'Jazz', 'Classique'].map((genre) => (
-                <label key={genre} className="genre-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={formik.values.genres.includes(genre)}
-                    onChange={() => {
-                      const newGenres = formik.values.genres.includes(genre)
-                        ? formik.values.genres.filter(g => g !== genre)
-                        : [...formik.values.genres, genre];
-                      formik.setFieldValue('genres', newGenres);
-                    }}
-                  />
-                  <span>{genre}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Réseaux sociaux</label>
-            <div className="social-links">
-              <input
-                type="text"
-                name="socialLinks.spotify"
-                placeholder="Lien Spotify"
-                value={formik.values.socialLinks.spotify}
-                onChange={formik.handleChange}
-              />
-              <input
-                type="text"
-                name="socialLinks.instagram"
-                placeholder="Lien Instagram"
-                value={formik.values.socialLinks.instagram}
-                onChange={formik.handleChange}
-              />
-              <input
-                type="text"
-                name="socialLinks.twitter"
-                placeholder="Lien Twitter"
-                value={formik.values.socialLinks.twitter}
-                onChange={formik.handleChange}
-              />
-            </div>
+            <label htmlFor="genre">Genre</label>
+            <input
+              id="genre"
+              name="genre"
+              type="text"
+              value={formik.values.genre}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={formik.errors.genre && formik.touched.genre ? 'error' : ''}
+            />
+            {formik.errors.genre && formik.touched.genre && (
+              <span className="error-message">{formik.errors.genre}</span>
+            )}
           </div>
         </div>
 

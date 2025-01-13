@@ -8,10 +8,13 @@ import AlbumForm from './pages/albums/AlbumForm';
 import Dashboard from './pages/dashboard/Dashboard';
 import './styles/global.scss';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useOfflineMode } from './hooks/useOfflineMode';
 
 const queryClient = new QueryClient();
 
 function App() {
+  useOfflineMode();
+
   return (
     <QueryClientProvider client={queryClient}>
       <Layout>
