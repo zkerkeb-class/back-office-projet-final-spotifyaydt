@@ -50,7 +50,7 @@
         border: none;
 
         &:hover {
-          background-color: darken($error-color, 10%);
+          opacity: 0.9;
         }
       }
 

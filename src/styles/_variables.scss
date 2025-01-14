@@ -1,10 +1,33 @@
-// Couleurs
-$primary-color: #1DB954;
-$secondary-color: #282828;
-$background-color: #121212;
-$text-color: #FFFFFF;
-$error-color: #E74C3C;
-$border-color: rgba(255, 255, 255, 0.1);
+// Thème clair
+:root {
+  --primary-color: #1DB954;
+  --secondary-color: #282828;
+  --background-color: #FFFFFF;
+  --text-color: #121212;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --error-color: #E74C3C;
+  --sidebar-background: #f5f5f5;
+}
+
+// Thème sombre
+.dark-mode {
+  --primary-color: #1DB954;
+  --secondary-color: #282828;
+  --background-color: #121212;
+  --text-color: #FFFFFF;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --error-color: #E74C3C;
+  --sidebar-background: #282828;
+}
+
+// Remplacer les valeurs fixes par des variables CSS
+$primary-color: var(--primary-color);
+$secondary-color: var(--secondary-color);
+$background-color: var(--background-color);
+$text-color: var(--text-color);
+$border-color: var(--border-color);
+$error-color: var(--error-color);
+$sidebar-background: var(--sidebar-background);
 
 // Espacement
 $spacing-xs: 4px;
