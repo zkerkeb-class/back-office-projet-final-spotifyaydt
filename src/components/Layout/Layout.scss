@@ -95,4 +95,36 @@
       background: rgba($secondary-color, 0.5);
     }
   }
+}
+
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba($primary-color, 0.95);
+  color: white;
+  padding: $spacing-sm;
+  text-align: center;
+  font-size: $font-size-sm;
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+
+  svg {
+    font-size: $font-size-md;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 } 
