@@ -8,9 +8,11 @@
 
 .sidebar {
   width: 250px;
-  background-color: $secondary-color;
+  background-color: $sidebar-background;
   padding: $spacing-lg;
   box-shadow: $box-shadow;
+  position: relative;
+  min-height: 100vh;
 
   &__logo {
     margin-bottom: $spacing-xl;
@@ -74,7 +76,7 @@
 
 .content {
   flex: 1;
-  padding: $spacing-xl;
+  padding: $spacing-lg;
   background-color: $background-color;
   overflow-y: auto;
 
@@ -83,16 +85,16 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: rgba($secondary-color, 0.1);
+    background: rgba($text-color, 0.05);
     border-radius: $border-radius;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba($secondary-color, 0.3);
+    background: rgba($text-color, 0.2);
     border-radius: $border-radius;
 
     &:hover {
-      background: rgba($secondary-color, 0.5);
+      background: rgba($text-color, 0.3);
     }
   }
 }
@@ -126,5 +128,31 @@
   }
   to {
     transform: translateY(0);
+  }
+}
+
+.theme-toggle {
+  position: absolute;
+  top: $spacing-lg;
+  right: $spacing-sm;
+  transform: none;
+  background: none;
+  border: none;
+  color: $text-color;
+  font-size: $font-size-lg;
+  cursor: pointer;
+  padding: $spacing-sm;
+  border-radius: 50%;
+  transition: all $transition-duration ease;
+  z-index: 10;
+  margin-top: 0;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+    color: $primary-color;
+  }
+
+  svg {
+    display: block;
   }
 } 

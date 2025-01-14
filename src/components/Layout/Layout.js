@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaMusic, FaUser, FaChartLine, FaWifi } from 'react-icons/fa';
+import { FaMusic, FaUser, FaChartLine, FaWifi, FaSun, FaMoon } from 'react-icons/fa';
 import { useOfflineMode } from '../../hooks/useOfflineMode';
+import { useTheme } from '../../contexts/ThemeContext';
 import './Layout.scss';
 
 function Layout({ children }) {
   const location = useLocation();
   const { isOnline } = useOfflineMode();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
@@ -44,6 +46,13 @@ function Layout({ children }) {
             </Link>
           </li>
         </ul>
+        <button 
+          className="theme-toggle" 
+          onClick={toggleTheme}
+          aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}
+        >
+          {isDarkMode ? <FaSun /> : <FaMoon />}
+        </button>
       </nav>
       <main className="content">
         {children}
