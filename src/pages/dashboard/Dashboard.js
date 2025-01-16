@@ -22,6 +22,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import './Dashboard.scss';
+import { useTranslation } from '../../hooks/useTranslation';
 
 // Déplaçons les fonctions de formatage dans un objet séparé
 const formatters = {
@@ -102,6 +103,7 @@ function Dashboard() {
     const saved = localStorage.getItem('kpiConfig');
     return saved ? JSON.parse(saved) : { kpis: defaultKPIs };
   });
+  const t = useTranslation();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -148,7 +150,7 @@ function Dashboard() {
   return (
     <div className="dashboard">
       <div className="dashboard__header">
-        <h2>Tableau de bord système</h2>
+        <h2>{t('dashboard.title')}</h2>
         <div className="dashboard__controls">
           <span className="dashboard__refresh">
             Actualisation automatique toutes les 5 secondes

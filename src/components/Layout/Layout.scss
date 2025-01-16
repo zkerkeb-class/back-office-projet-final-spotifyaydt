@@ -133,7 +133,6 @@
 
 .theme-toggle {
   position: absolute;
-  top: $spacing-lg;
   right: $spacing-sm;
   transform: none;
   background: none;
@@ -154,5 +153,57 @@
 
   svg {
     display: block;
+  }
+}
+
+.sidebar__controls {
+  position: absolute;
+  bottom: $spacing-xl;
+  left: 0;
+  right: 0;
+  padding: 0 $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  align-items: center;
+
+  .language-selector {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    color: $text-color;
+
+    svg {
+      font-size: $font-size-lg;
+    }
+
+    select {
+      background: none;
+      border: 1px solid $border-color;
+      color: $text-color;
+      padding: $spacing-xs $spacing-sm;
+      border-radius: $border-radius-sm;
+      cursor: pointer;
+      font-size: $font-size-sm;
+
+      &:hover {
+        border-color: $primary-color;
+      }
+
+      option {
+        background-color: $background-color;
+        color: $text-color;
+      }
+    }
+  }
+}
+
+[dir="rtl"] {
+  .sidebar__menu {
+    li {
+      a {
+        flex-direction: row-reverse;
+      }
+    }
   }
 } 
