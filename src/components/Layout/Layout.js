@@ -65,9 +65,9 @@ function Layout({ children }) {
               onChange={(e) => changeLanguage(e.target.value)}
               aria-label="Select language"
             >
-              <option value="fr">{t('language.fr')}</option>
-              <option value="en">{t('language.en')}</option>
-              <option value="ar">{t('language.ar')}</option>
+              <option value="fr">French</option>
+              <option value="en">English</option>
+              <option value="ar">Arabic</option>
             </select>
           </div>
         </div>
