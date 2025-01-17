@@ -33,4 +33,30 @@ a {
 
 ul {
   list-style: none;
+}
+
+[dir="rtl"] {
+  .sidebar {
+    &__menu {
+      li {
+        a {
+          flex-direction: row-reverse;
+        }
+      }
+    }
+  }
+
+  .dashboard {
+    &__header {
+      flex-direction: row-reverse;
+    }
+
+    &__controls {
+      flex-direction: row-reverse;
+    }
+
+    &__metrics {
+      direction: rtl;
+    }
+  }
 } 

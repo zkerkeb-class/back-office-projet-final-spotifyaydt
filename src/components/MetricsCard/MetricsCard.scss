@@ -4,24 +4,21 @@
 .metrics-card {
   background: rgba($secondary-color, 0.3);
   border-radius: $border-radius;
-  padding: $spacing-lg;
+  padding: $spacing-md;
   @include flex(row, flex-start, center);
-  gap: $spacing-lg;
+  gap: $spacing-md;
   transition: all $transition-duration ease;
   cursor: move;
+  width: 300px;
+  margin-bottom: $spacing-sm;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: $box-shadow-lg;
   }
 
-  &--alert {
-    background: rgba($error-color, 0.1);
-    border: 1px solid rgba($error-color, 0.3);
-  }
-
   &__icon {
-    font-size: $font-size-xl * 1.5;
+    font-size: $font-size-lg;
     opacity: 0.8;
   }
 
@@ -36,25 +33,22 @@
   }
 
   &__value {
-    font-size: $font-size-lg;
+    font-size: $font-size-md;
     font-weight: 600;
     @include flex(row, flex-start, center);
     gap: $spacing-sm;
   }
 
-  &__trend {
-    font-size: $font-size-sm;
-    @include flex(row, flex-start, center);
-    gap: $spacing-xs;
+  &.alert {
+    background-color: rgba($error-color, 0.1);
+    border: 1px solid $error-color;
 
-    .trend-icon {
-      &--up {
-        color: $primary-color;
-      }
+    .metrics-card__value {
+      color: $error-color;
+    }
 
-      &--down {
-        color: $error-color;
-      }
+    .metrics-card__icon {
+      color: $error-color;
     }
   }
 } 

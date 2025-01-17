@@ -1,29 +1,40 @@
 import React from 'react';
-import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import './MetricsCard.scss';
 
-export const MetricsCard = ({ title, value, trend, icon, alert }) => {
-  const getTrendIcon = () => {
-    if (trend > 0) return <FaArrowUp className="trend-icon trend-icon--up" />;
-    if (trend < 0) return <FaArrowDown className="trend-icon trend-icon--down" />;
+const formatNumber = (value) => {
+  if (typeof value === 'number') {
+    return Number(value.toFixed(2));
+  }
+  return value;
+};
+
+export function MetricsCard({ kpi, metrics }) {
+  const { t } = useTranslation();
+
+  if (!kpi || !metrics) {
     return null;
-  };
+  }
+
+  const isAlertTriggered = kpi.alertThreshold && 
+    metrics[kpi.id] > kpi.alertThreshold;
 
   return (
-    <div className={`metrics-card ${alert ? 'metrics-card--alert' : ''}`}>
-      <div className="metrics-card__icon">{icon}</div>
+    <div className={`metrics-card ${isAlertTriggered ? 'alert' : ''}`}>
+      <div className="metrics-card__icon">
+        {kpi.icon}
+      </div>
       <div className="metrics-card__content">
-        <h3 className="metrics-card__title">{title}</h3>
+        <h3 className="metrics-card__title">{t(`dashboard.metrics.${kpi.id}`)}</h3>
         <div className="metrics-card__value">
-          {value}
-          {trend !== undefined && (
-            <span className="metrics-card__trend">
-              {getTrendIcon()}
-              {Math.abs(trend)}%
+          {formatNumber(metrics[kpi.id])}
+          {metrics[`${kpi.id}Trend`] && (
+            <span className={`trend ${metrics[`${kpi.id}Trend`] > 0 ? 'up' : 'down'}`}>
+              {formatNumber(metrics[`${kpi.id}Trend`])}%
             </span>
           )}
         </div>
       </div>
     </div>
   );
-}; 
+} 

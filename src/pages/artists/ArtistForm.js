@@ -1,27 +1,30 @@
 import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 import { FaPlus } from 'react-icons/fa';
 import ImageManager from '../../components/ImageManager/ImageManager';
 import './ArtistForm.scss';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 
-const validationSchema = Yup.object({
-  name: Yup.string()
-    .required('Le nom est requis')
-    .min(2, 'Le nom doit contenir au moins 2 caractères'),
-  description: Yup.string()
-    .required('La description est requise')
-    .min(10, 'La description doit contenir au moins 10 caractères'),
-  genre: Yup.string()
-    .required('Le genre est requis')
-    .min(2, 'Le genre doit contenir au moins 2 caractères'),
-});
-
 function ArtistForm() {
+  const { t } = useTranslation();
   const [artistImage, setArtistImage] = React.useState(null);
   const navigate = useNavigate();
+
+  const validationSchema = Yup.object({
+    name: Yup.string()
+      .required(t('artists.form.validation.nameRequired'))
+      .min(2, t('artists.form.validation.nameMin')),
+    description: Yup.string()
+      .required(t('artists.form.validation.biographyRequired'))
+      .min(10, t('artists.form.validation.biographyMin')),
+    genre: Yup.string()
+      .required(t('artists.form.validation.genreRequired'))
+      .min(2, t('artists.form.validation.genreMin')),
+  });
+
   const formik = useFormik({
     initialValues: {
       name: '',
@@ -35,12 +38,11 @@ function ArtistForm() {
         const artistData = {
           ...values,
           image: artistImage,
-          popularity: 0, // Force à 0 pour la création
+          popularity: 0,
         };
         
         const response = await api.post('/artists', artistData);
         if (response) {
-          // Redirection vers la liste des artistes après création
           navigate('/artists');
         }
       } catch (error) {
@@ -55,13 +57,13 @@ function ArtistForm() {
 
   return (
     <div className="artist-form">
-      <h2>Nouvel Artiste</h2>
+      <h2>{t('artists.form.title.add')}</h2>
       
       <form onSubmit={formik.handleSubmit}>
         <div className="form-grid">
           <div className="form-group full-width">
             <ImageManager
-              label="Photo de l'artiste"
+              label={t('artists.form.image')}
               onImageChange={handleImageChange}
               initialImage={null}
               aspectRatio={1}
@@ -70,7 +72,7 @@ function ArtistForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="name">Nom de l'artiste</label>
+            <label htmlFor="name">{t('artists.form.name')}</label>
             <input
               id="name"
               name="name"
@@ -86,7 +88,7 @@ function ArtistForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Description</label>
+            <label htmlFor="description">{t('artists.form.biography')}</label>
             <textarea
               id="description"
               name="description"
@@ -102,7 +104,7 @@ function ArtistForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="genre">Genre</label>
+            <label htmlFor="genre">{t('artists.form.genre')}</label>
             <input
               id="genre"
               name="genre"
@@ -120,7 +122,7 @@ function ArtistForm() {
 
         <div className="form-actions">
           <button type="submit" className="btn btn--primary">
-            Enregistrer
+            {t('artists.form.submit')}
           </button>
         </div>
       </form>

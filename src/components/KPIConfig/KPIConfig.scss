@@ -1,11 +1,21 @@
 @import '../../styles/variables';
 @import '../../styles/mixins';
 
+.kpi-config-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
 .kpi-config {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   background: $background-color;
   padding: $spacing-lg;
   border-radius: $border-radius;
@@ -13,6 +23,12 @@
   min-width: 300px;
   max-width: 500px;
   width: 90%;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 400px;
+  position: relative;
+  z-index: 1001;
 
   &__header {
     @include flex(row, space-between, center);
