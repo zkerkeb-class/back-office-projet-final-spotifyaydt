@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
 import SearchBar from '../../components/SearchBar/SearchBar';
@@ -10,6 +11,7 @@ import { ErrorState } from '../../components/ErrorState/ErrorState';
 
 function ArtistList() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchResults, setSearchResults] = React.useState(null);
 
   const { data: artists, isLoading, error, refetch } = useQuery({
@@ -34,7 +36,7 @@ function ArtistList() {
   if (isLoading) return (
     <div className="loading-state">
       <div className="spinner"></div>
-      <p>Chargement des artistes...</p>
+      <p>{t('artists.loading')}</p>
     </div>
   );
 
@@ -43,19 +45,19 @@ function ArtistList() {
   return (
     <div className="artist-list">
       <div className="artist-list__header">
-        <h2>Gestion des Artistes</h2>
+        <h2>{t('artists.title')}</h2>
         <button 
           className="btn btn--primary"
           onClick={() => navigate('/artists/new')}
         >
           <FaPlus />
-          Nouvel Artiste
+          {t('artists.add')}
         </button>
       </div>
       
       <div className="artist-list__search">
         <SearchBar
-          placeholder="Rechercher un artiste..."
+          placeholder={t('artists.search')}
           onSearch={handleSearch}
         />
       </div>
@@ -64,10 +66,10 @@ function ArtistList() {
         <table>
           <thead>
             <tr>
-              <th>Nom</th>
-              <th>Genre</th>
-              <th>Popularité</th>
-              <th>Actions</th>
+              <th>{t('artists.table.name')}</th>
+              <th>{t('artists.table.genre')}</th>
+              <th>{t('artists.table.followers')}</th>
+              <th>{t('artists.table.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -80,12 +82,18 @@ function ArtistList() {
                   <button 
                     className="btn btn--icon"
                     onClick={() => navigate(`/artists/edit/${artist._id}`)}
+                    aria-label={t('artists.form.title.edit')}
                   >
                     <FaEdit />
                   </button>
                   <button 
                     className="btn btn--icon btn--danger"
-                    onClick={() => console.log('delete')}
+                    onClick={() => {
+                      if (window.confirm(t('artists.confirmDelete'))) {
+                        console.log('delete');
+                      }
+                    }}
+                    aria-label={t('artists.delete')}
                   >
                     <FaTrash />
                   </button>

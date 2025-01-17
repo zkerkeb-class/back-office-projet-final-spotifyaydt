@@ -5,6 +5,7 @@ import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { MetricsCard } from '../../components/MetricsCard/MetricsCard';
 import { FaCog } from 'react-icons/fa';
 import { KPIConfig } from '../../components/KPIConfig/KPIConfig';
+import { useTranslation } from 'react-i18next';
 import {
   DndContext,
   closestCenter,
@@ -22,62 +23,53 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import './Dashboard.scss';
-import { useTranslation } from '../../hooks/useTranslation';
 
-// Déplaçons les fonctions de formatage dans un objet séparé
-const formatters = {
-  apiResponseTime: (value) => `${value?.toFixed(2) || 0} ms`,
-  cpuUsage: (value) => `${value?.toFixed(1) || 0}%`,
-  memoryUsage: (value) => `${value?.toFixed(1) || 0}%`,
-  redisLatency: (value) => `${value?.toFixed(2) || 0} ms`,
-  bandwidth: (value) => `${((value || 0) / 1024 / 1024).toFixed(2)} MB/s`,
-  requestsPerSecond: (value) => value || 0,
-};
-
-// Configuration par défaut des KPIs
 const defaultKPIs = [
   {
     id: 'apiResponseTime',
-    name: 'Temps de réponse API',
     icon: '⚡',
   },
   {
     id: 'cpuUsage',
-    name: 'CPU',
     icon: '🔧',
     alertThreshold: 80,
   },
   {
     id: 'memoryUsage',
-    name: 'Mémoire',
     icon: '💾',
     alertThreshold: 80,
   },
   {
     id: 'redisLatency',
-    name: 'Latence Redis',
     icon: '⚡',
   },
   {
     id: 'bandwidth',
-    name: 'Bande passante',
     icon: '📊',
   },
   {
     id: 'requestsPerSecond',
-    name: 'Requêtes/sec',
     icon: '🔄',
   },
 ];
 
-function SortableMetricsCard({ kpi, metrics }) {
+const formatters = {
+  apiResponseTime: (value) => `${value}ms`,
+  cpuUsage: (value) => `${value}%`,
+  memoryUsage: (value) => `${value}%`,
+  redisLatency: (value) => `${value}ms`,
+  bandwidth: (value) => `${value}MB/s`,
+  requestsPerSecond: (value) => value,
+};
+
+function SortableMetricsCard(props) {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: kpi.id });
+  } = useSortable({ id: props.kpi.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -86,13 +78,7 @@ function SortableMetricsCard({ kpi, metrics }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <MetricsCard
-        title={kpi.name}
-        value={formatters[kpi.id](metrics[kpi.id])}
-        trend={metrics[`${kpi.id}Trend`]}
-        icon={kpi.icon}
-        alert={kpi.alertThreshold && metrics[kpi.id] > kpi.alertThreshold}
-      />
+      <MetricsCard {...props} />
     </div>
   );
 }
@@ -103,7 +89,7 @@ function Dashboard() {
     const saved = localStorage.getItem('kpiConfig');
     return saved ? JSON.parse(saved) : { kpis: defaultKPIs };
   });
-  const t = useTranslation();
+  const { t } = useTranslation();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -112,28 +98,11 @@ function Dashboard() {
     })
   );
 
-  const { data: metrics, isLoading, error, refetch } = useQuery({
-    queryKey: ['system-metrics'],
+  const { data: metrics, isLoading, isError, error } = useQuery({
+    queryKey: ['metrics'],
     queryFn: () => api.get('/metrics/system'),
     refetchInterval: 5000,
-    retry: 2,
   });
-
-  if (isLoading) return (
-    <div className="loading-state">
-      <div className="spinner"></div>
-      <p>Chargement des métriques système...</p>
-    </div>
-  );
-
-  if (error) return <ErrorState error={error} onRetry={refetch} />;
-  if (!metrics) return null;
-
-  const handleConfigUpdate = (updatedKpis) => {
-    const newConfig = { ...config, kpis: updatedKpis };
-    setConfig(newConfig);
-    localStorage.setItem('kpiConfig', JSON.stringify(newConfig));
-  };
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -142,10 +111,33 @@ function Dashboard() {
       const oldIndex = config.kpis.findIndex((kpi) => kpi.id === active.id);
       const newIndex = config.kpis.findIndex((kpi) => kpi.id === over.id);
 
-      const newKpis = arrayMove(config.kpis, oldIndex, newIndex);
-      handleConfigUpdate(newKpis);
+      const newConfig = {
+        ...config,
+        kpis: arrayMove(config.kpis, oldIndex, newIndex),
+      };
+
+      setConfig(newConfig);
+      localStorage.setItem('kpiConfig', JSON.stringify(newConfig));
     }
   };
+
+  const handleConfigUpdate = (updatedKpis) => {
+    const newConfig = { ...config, kpis: updatedKpis };
+    setConfig(newConfig);
+    localStorage.setItem('kpiConfig', JSON.stringify(newConfig));
+    setShowConfig(false);
+  };
+
+  if (isError) {
+    return <ErrorState error={error} />;
+  }
+
+  if (isLoading) return (
+    <div className="loading-state">
+      <div className="spinner"></div>
+      <p>{t('dashboard.loading')}</p>
+    </div>
+  );
 
   return (
     <div className="dashboard">
@@ -153,10 +145,14 @@ function Dashboard() {
         <h2>{t('dashboard.title')}</h2>
         <div className="dashboard__controls">
           <span className="dashboard__refresh">
-            Actualisation automatique toutes les 5 secondes
+            {t('dashboard.refresh')}
           </span>
-          <button className="dashboard__config-btn" onClick={() => setShowConfig(!showConfig)}>
-            <FaCog /> Configuration
+          <button 
+            className="dashboard__config-btn" 
+            onClick={() => setShowConfig(!showConfig)}
+            aria-label={t('dashboard.configuration')}
+          >
+            <FaCog /> {t('dashboard.configuration')}
           </button>
         </div>
       </div>
@@ -166,12 +162,9 @@ function Dashboard() {
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext
-          items={(config.kpis || defaultKPIs).filter(kpi => !kpi.hidden).map(kpi => kpi.id)}
-          strategy={rectSortingStrategy}
-        >
-          <div className="dashboard__metrics-grid">
-            {(config.kpis || defaultKPIs)
+        <div className="dashboard__metrics">
+          <SortableContext items={config.kpis.map(kpi => kpi.id)} strategy={rectSortingStrategy}>
+            {config.kpis
               .filter(kpi => !kpi.hidden)
               .map((kpi) => (
                 <SortableMetricsCard
@@ -180,13 +173,13 @@ function Dashboard() {
                   metrics={metrics}
                 />
               ))}
-          </div>
-        </SortableContext>
+          </SortableContext>
+        </div>
       </DndContext>
 
       {showConfig && (
         <KPIConfig
-          kpis={config.kpis || defaultKPIs}
+          kpis={config.kpis}
           onUpdate={handleConfigUpdate}
           onClose={() => setShowConfig(false)}
         />

@@ -1,41 +1,12 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { LanguageProvider } from './contexts/LanguageContext';
-import Layout from './components/Layout/Layout';
-import ArtistList from './pages/artists/ArtistList';
-import ArtistForm from './pages/artists/ArtistForm';
-import AlbumList from './pages/albums/AlbumList';
-import AlbumForm from './pages/albums/AlbumForm';
-import Dashboard from './pages/dashboard/Dashboard';
+import Router from './Router';
 import './styles/global.scss';
-import { useOfflineMode } from './hooks/useOfflineMode';
 
-const queryClient = new QueryClient();
-
-function App() {
-  useOfflineMode();
-
+function App({ RouterComponent = React.Fragment }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <LanguageProvider>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Navigate to="/metrics" replace />} />
-              <Route path="/metrics" element={<Dashboard />} />
-              <Route path="/artists" element={<ArtistList />} />
-              <Route path="/artists/new" element={<ArtistForm />} />
-              <Route path="/artists/edit/:id" element={<ArtistForm />} />
-              <Route path="/albums" element={<AlbumList />} />
-              <Route path="/albums/new" element={<AlbumForm />} />
-              <Route path="/albums/edit/:id" element={<AlbumForm />} />
-            </Routes>
-          </Layout>
-        </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <RouterComponent>
+      <Router />
+    </RouterComponent>
   );
 }
 

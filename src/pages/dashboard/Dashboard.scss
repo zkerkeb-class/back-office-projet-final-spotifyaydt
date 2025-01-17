@@ -48,6 +48,13 @@
     margin-bottom: $spacing-xl;
     min-height: 200px;
   }
+
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: $spacing-md;
+    padding: $spacing-md;
+  }
 }
 
 // Ajout d'un overlay pour la modale

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
 import SearchBar from '../../components/SearchBar/SearchBar';
@@ -10,13 +11,14 @@ import './AlbumList.scss';
 
 function AlbumList() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchResults, setSearchResults] = React.useState(null);
 
   const { data: albums, isLoading, error, refetch } = useQuery({
     queryKey: ['albums'],
     queryFn: () => api.get('/albums'),
     retry: 2,
-    staleTime: 30000, // 30 secondes
+    staleTime: 30000,
     refetchOnWindowFocus: false,
   });
 
@@ -34,7 +36,7 @@ function AlbumList() {
   if (isLoading) return (
     <div className="loading-state">
       <div className="spinner"></div>
-      <p>Chargement des albums...</p>
+      <p>{t('albums.loading')}</p>
     </div>
   );
 
@@ -43,19 +45,19 @@ function AlbumList() {
   return (
     <div className="album-list">
       <div className="album-list__header">
-        <h2>Gestion des Albums</h2>
+        <h2>{t('albums.title')}</h2>
         <button 
           className="btn btn--primary"
           onClick={() => navigate('/albums/new')}
         >
           <FaPlus />
-          Nouvel Album
+          {t('albums.add')}
         </button>
       </div>
       
       <div className="album-list__search">
         <SearchBar
-          placeholder="Rechercher un album..."
+          placeholder={t('albums.search')}
           onSearch={handleSearch}
         />
       </div>
@@ -65,12 +67,12 @@ function AlbumList() {
           <thead>
             <tr>
               <th style={{ width: '60px' }}></th>
-              <th>Titre</th>
-              <th>Artiste</th>
-              <th>Genre</th>
-              <th>Date de sortie</th>
-              <th>Pistes</th>
-              <th>Actions</th>
+              <th>{t('albums.table.title')}</th>
+              <th>{t('albums.table.artist')}</th>
+              <th>{t('albums.table.genre')}</th>
+              <th>{t('albums.table.year')}</th>
+              <th>{t('albums.table.tracks')}</th>
+              <th>{t('albums.table.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -90,12 +92,18 @@ function AlbumList() {
                   <button 
                     className="btn btn--icon"
                     onClick={() => navigate(`/albums/edit/${album._id}`)}
+                    aria-label={t('albums.form.title.edit')}
                   >
                     <FaEdit />
                   </button>
                   <button 
                     className="btn btn--icon btn--danger"
-                    onClick={() => console.log('delete', album._id)}
+                    onClick={() => {
+                      if (window.confirm(t('albums.confirmDelete'))) {
+                        console.log('delete', album._id);
+                      }
+                    }}
+                    aria-label={t('albums.delete')}
                   >
                     <FaTrash />
                   </button>
