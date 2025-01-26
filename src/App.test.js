@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import App from './App';
@@ -49,19 +50,32 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-test('renders spotify admin title', () => {
+test('renders login page when not authenticated', () => {
   render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <App RouterComponent={MemoryRouter} />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
-  
-  const titleElement = screen.getByText(/Spotify/i);
-  expect(titleElement).toBeInTheDocument();
-  
-  const adminText = screen.getByText(/Administration/i);
-  expect(adminText).toBeInTheDocument();
+
+  // Vérifie que la page de login est affichée
+  const loginTitle = screen.getByText(/Connexion/i);
+  expect(loginTitle).toBeInTheDocument();
+
+  // Vérifie que les champs de connexion sont présents
+  const emailInput = screen.getByLabelText(/Email/i);
+  const passwordInput = screen.getByLabelText(/Mot de passe/i);
+  const submitButton = screen.getByText(/Se connecter/i);
+
+  expect(emailInput).toBeInTheDocument();
+  expect(passwordInput).toBeInTheDocument();
+  expect(submitButton).toBeInTheDocument();
+
+  // Vérifie que les informations d'aide sont affichées
+  const helpText = screen.getByText(/Comptes de test/i);
+  expect(helpText).toBeInTheDocument();
 });
 

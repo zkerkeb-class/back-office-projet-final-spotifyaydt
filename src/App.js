@@ -1,12 +1,16 @@
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import Router from './Router';
+import { AuthProvider } from './contexts/AuthContext';
 import './styles/global.scss';
 
-function App({ RouterComponent = React.Fragment }) {
+function App() {
   return (
-    <RouterComponent>
-      <Router />
-    </RouterComponent>
+    <BrowserRouter>
+      <AuthProvider>
+        <Router />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

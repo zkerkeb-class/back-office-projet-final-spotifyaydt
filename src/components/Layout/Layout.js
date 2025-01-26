@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaMusic, FaUser, FaChartLine, FaWifi, FaSun, FaMoon, FaGlobe } from 'react-icons/fa';
+import { FaMusic, FaUser, FaChartLine, FaWifi, FaSun, FaMoon, FaGlobe, FaSignOutAlt } from 'react-icons/fa';
 import { useOfflineMode } from '../../hooks/useOfflineMode';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
 import './Layout.scss';
 
 function Layout({ children }) {
@@ -11,13 +12,18 @@ function Layout({ children }) {
   const { isOnline } = useOfflineMode();
   const { isDarkMode, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
+  const { user, logout } = useAuth();
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
+  const handleLogout = () => {
+    logout();
   };
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
+  };
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
   };
 
   return (
@@ -31,6 +37,10 @@ function Layout({ children }) {
       <nav className="sidebar" role="navigation" aria-label={t('nav.main')}>
         <div className="sidebar__logo">
           <h1 tabIndex="0">Spotify {t('nav.admin')}</h1>
+        </div>
+        <div className="user-info">
+          <span className="user-email">{user?.email}</span>
+          <span className="user-role">{user?.role}</span>
         </div>
         <ul className="sidebar__menu">
           <li className={isActive('/metrics')}>
@@ -72,6 +82,14 @@ function Layout({ children }) {
               <option value="ar">{t('language.ar')}</option>
             </select>
           </div>
+          <button 
+            className="logout-button" 
+            onClick={handleLogout}
+            aria-label="Se déconnecter"
+          >
+            <FaSignOutAlt aria-hidden="true" />
+            <span>Se déconnecter</span>
+          </button>
         </div>
       </nav>
       <main className="content" role="main" id="main-content">
