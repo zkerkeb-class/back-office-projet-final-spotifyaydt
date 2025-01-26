@@ -30,6 +30,11 @@
     input, select {
       @include input-field;
 
+      option {
+        background-color: var(--background-color);
+        color: var(--text-color);
+      }
+
       &.error {
         border-color: $error-color;
       }

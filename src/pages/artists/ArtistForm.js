@@ -1,127 +1,144 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
-import { FaPlus } from 'react-icons/fa';
-import ImageManager from '../../components/ImageManager/ImageManager';
-import './ArtistForm.scss';
-import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import './ArtistForm.scss';
 
 function ArtistForm() {
-  const { t } = useTranslation();
-  const [artistImage, setArtistImage] = React.useState(null);
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const isEditMode = Boolean(id);
 
-  const validationSchema = Yup.object({
-    name: Yup.string()
-      .required(t('artists.form.validation.nameRequired'))
-      .min(2, t('artists.form.validation.nameMin')),
-    description: Yup.string()
-      .required(t('artists.form.validation.biographyRequired'))
-      .min(10, t('artists.form.validation.biographyMin')),
-    genre: Yup.string()
-      .required(t('artists.form.validation.genreRequired'))
-      .min(2, t('artists.form.validation.genreMin')),
+  const { data: artist, isLoading } = useQuery({
+    queryKey: ['artist', id],
+    queryFn: () => api.get(`/artists/${id}`),
+    enabled: isEditMode,
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (values) => {
+      // Convertir biography en description pour l'API
+      const apiData = {
+        ...values,
+        description: values.biography // Conversion du champ
+      };
+      delete apiData.biography; // Supprimer le champ biography
+
+      if (isEditMode) {
+        return api.put(`/artists/${id}`, apiData);
+      } else {
+        return api.post('/artists', apiData);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['artists']);
+      navigate('/artists');
+    },
   });
 
   const formik = useFormik({
     initialValues: {
       name: '',
-      description: '',
+      biography: '', // On garde biography dans le formulaire
       genre: '',
       popularity: 0,
     },
-    validationSchema,
-    onSubmit: async (values) => {
-      try {
-        const artistData = {
-          ...values,
-          image: artistImage,
-          popularity: 0,
-        };
-        
-        const response = await api.post('/artists', artistData);
-        if (response) {
-          navigate('/artists');
-        }
-      } catch (error) {
-        console.error('Erreur lors de la création:', error);
-      }
+    validationSchema: Yup.object({
+      name: Yup.string()
+        .required(t('artists.form.validation.nameRequired'))
+        .min(2, t('artists.form.validation.nameMin')),
+      biography: Yup.string() // Validation pour biography
+        .required(t('artists.form.validation.biographyRequired'))
+        .min(10, t('artists.form.validation.biographyMin')),
+      genre: Yup.string()
+        .required(t('artists.form.validation.genreRequired'))
+        .min(2, t('artists.form.validation.genreMin')),
+    }),
+    onSubmit: (values) => {
+      mutation.mutate(values);
     },
   });
 
-  const handleImageChange = (imageData) => {
-    setArtistImage(imageData);
-  };
+  useEffect(() => {
+    if (artist) {
+      formik.setValues({
+        name: artist.name || '',
+        biography: artist.description || '', // Conversion de description en biography
+        genre: artist.genre || '',
+        popularity: artist.popularity || 0,
+      });
+    }
+  }, [artist]);
+
+  if (isEditMode && isLoading) {
+    return (
+      <div className="loading-state">
+        <div className="spinner"></div>
+        <p>{t('artists.loading')}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="artist-form">
-      <h2>{t('artists.form.title.add')}</h2>
-      
+      <h2>{isEditMode ? t('artists.form.title.edit') : t('artists.form.title.add')}</h2>
       <form onSubmit={formik.handleSubmit}>
-        <div className="form-grid">
-          <div className="form-group full-width">
-            <ImageManager
-              label={t('artists.form.image')}
-              onImageChange={handleImageChange}
-              initialImage={null}
-              aspectRatio={1}
-              generateThumbnail={true}
-            />
-          </div>
+        <div className="form-group">
+          <label htmlFor="name">{t('artists.form.name')}</label>
+          <input
+            id="name"
+            type="text"
+            {...formik.getFieldProps('name')}
+            className={formik.touched.name && formik.errors.name ? 'error' : ''}
+          />
+          {formik.touched.name && formik.errors.name && (
+            <span className="error-message">{formik.errors.name}</span>
+          )}
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="name">{t('artists.form.name')}</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={formik.values.name}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={formik.errors.name && formik.touched.name ? 'error' : ''}
-            />
-            {formik.errors.name && formik.touched.name && (
-              <span className="error-message">{formik.errors.name}</span>
-            )}
-          </div>
+        <div className="form-group">
+          <label htmlFor="biography">{t('artists.form.biography')}</label>
+          <textarea
+            id="biography"
+            {...formik.getFieldProps('biography')}
+            className={formik.touched.biography && formik.errors.biography ? 'error' : ''}
+          />
+          {formik.touched.biography && formik.errors.biography && (
+            <span className="error-message">{formik.errors.biography}</span>
+          )}
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="description">{t('artists.form.biography')}</label>
-            <textarea
-              id="description"
-              name="description"
-              rows="4"
-              value={formik.values.description}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={formik.errors.description && formik.touched.description ? 'error' : ''}
-            />
-            {formik.errors.description && formik.touched.description && (
-              <span className="error-message">{formik.errors.description}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="genre">{t('artists.form.genre')}</label>
-            <input
-              id="genre"
-              name="genre"
-              type="text"
-              value={formik.values.genre}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={formik.errors.genre && formik.touched.genre ? 'error' : ''}
-            />
-            {formik.errors.genre && formik.touched.genre && (
-              <span className="error-message">{formik.errors.genre}</span>
-            )}
-          </div>
+        <div className="form-group">
+          <label htmlFor="genre">{t('artists.form.genre')}</label>
+          <input
+            id="genre"
+            type="text"
+            {...formik.getFieldProps('genre')}
+            className={formik.touched.genre && formik.errors.genre ? 'error' : ''}
+          />
+          {formik.touched.genre && formik.errors.genre && (
+            <span className="error-message">{formik.errors.genre}</span>
+          )}
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="btn btn--primary">
+          <button 
+            type="button" 
+            className="btn btn--secondary"
+            onClick={() => navigate('/artists')}
+          >
+            {t('artists.form.cancel')}
+          </button>
+          <button 
+            type="submit" 
+            className="btn btn--primary"
+            disabled={mutation.isLoading}
+          >
             {t('artists.form.submit')}
           </button>
         </div>

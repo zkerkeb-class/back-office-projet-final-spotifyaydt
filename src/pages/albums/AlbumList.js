@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
@@ -12,6 +12,7 @@ import './AlbumList.scss';
 function AlbumList() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [searchResults, setSearchResults] = React.useState(null);
 
   const { data: albums, isLoading, error, refetch } = useQuery({
@@ -22,6 +23,17 @@ function AlbumList() {
     refetchOnWindowFocus: false,
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (albumId) => api.delete(`/albums/${albumId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['albums']);
+    },
+    onError: (error) => {
+      console.error('Erreur lors de la suppression:', error);
+      alert(t('albums.deleteError'));
+    }
+  });
+
   const handleSearch = (query) => {
     if (!query || query.trim() === '') {
       setSearchResults(null);
@@ -29,6 +41,16 @@ function AlbumList() {
     }
     const results = phoneticSearch(query.trim(), albums, 'title', 0.3);
     setSearchResults(results);
+  };
+
+  const handleDelete = async (albumId) => {
+    if (window.confirm(t('albums.confirmDelete'))) {
+      try {
+        await deleteMutation.mutateAsync(albumId);
+      } catch (error) {
+        // L'erreur est déjà gérée dans onError de la mutation
+      }
+    }
   };
 
   const displayedAlbums = searchResults || albums || [];
@@ -54,7 +76,7 @@ function AlbumList() {
           {t('albums.add')}
         </button>
       </div>
-      
+
       <div className="album-list__search">
         <SearchBar
           placeholder={t('albums.search')}
@@ -84,10 +106,10 @@ function AlbumList() {
                   </div>
                 </td>
                 <td>{album.title}</td>
-                <td>{album.artist.name}</td>
+                <td>{album.artist?.name || t('albums.unknownArtist')}</td>
                 <td>{album.genre}</td>
                 <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
-                <td>{album.tracks.length}</td>
+                <td>{album.tracks?.length || 0}</td>
                 <td className="actions">
                   <button 
                     className="btn btn--icon"
@@ -98,12 +120,9 @@ function AlbumList() {
                   </button>
                   <button 
                     className="btn btn--icon btn--danger"
-                    onClick={() => {
-                      if (window.confirm(t('albums.confirmDelete'))) {
-                        console.log('delete', album._id);
-                      }
-                    }}
+                    onClick={() => handleDelete(album._id)}
                     aria-label={t('albums.delete')}
+                    disabled={deleteMutation.isLoading}
                   >
                     <FaTrash />
                   </button>

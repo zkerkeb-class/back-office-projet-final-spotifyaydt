@@ -114,5 +114,74 @@ export const api = {
         throw error;
       }
     }
+  },
+
+  async put(endpoint, data) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      
+      // Stocker dans le bon store IndexedDB
+      const storeName = getStoreNameFromEndpoint(endpoint);
+      const db = await openDB(DB_NAME);
+      const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+      await store.put(ensureId(responseData));
+      
+      return responseData;
+    } catch (error) {
+      console.error('API Error:', error);
+      
+      // En cas d'erreur, stocker temporairement dans le bon store IndexedDB
+      try {
+        const storeName = getStoreNameFromEndpoint(endpoint);
+        const db = await openDB(DB_NAME);
+        const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+        const tempData = ensureId({ ...data, id: endpoint.split('/').pop() });
+        await store.put(tempData);
+        return tempData;
+      } catch (dbError) {
+        console.error('IndexedDB Error:', dbError);
+        throw error;
+      }
+    }
+  },
+
+  async delete(endpoint) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Supprimer de IndexedDB
+      const storeName = getStoreNameFromEndpoint(endpoint);
+      const db = await openDB(DB_NAME);
+      const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+      await store.delete(endpoint.split('/').pop());
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
   }
 }; 
