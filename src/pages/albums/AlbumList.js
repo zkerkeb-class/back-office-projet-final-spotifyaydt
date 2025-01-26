@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
@@ -36,6 +36,11 @@ function AlbumList() {
   });
   
   const [showFilters, setShowFilters] = useState(false);
+
+  const [sorting, setSorting] = useState({
+    field: 'title',
+    direction: 'asc'
+  });
 
   const { data: albums, isLoading, error, refetch } = useQuery({
     queryKey: ['albums'],
@@ -224,6 +229,61 @@ function AlbumList() {
   // Extraire les genres uniques
   const uniqueGenres = [...new Set(albums?.map(album => album.genre) || [])];
 
+  // Fonction de tri
+  const sortData = (data) => {
+    if (!data) return [];
+    
+    return [...data].sort((a, b) => {
+      let aValue = a[sorting.field];
+      let bValue = b[sorting.field];
+
+      // Gestion spéciale pour certains champs
+      switch (sorting.field) {
+        case 'artist':
+          aValue = a.artist?.name || '';
+          bValue = b.artist?.name || '';
+          break;
+        case 'tracks':
+          aValue = a.tracks?.length || 0;
+          bValue = b.tracks?.length || 0;
+          break;
+        case 'year':
+          aValue = new Date(a.releaseDate).getFullYear();
+          bValue = new Date(b.releaseDate).getFullYear();
+          break;
+        case 'genre':
+          aValue = a.genre || '';
+          bValue = b.genre || '';
+          break;
+      }
+
+      // Conversion en minuscules pour les chaînes
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return sorting.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sorting.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const handleSort = (field) => {
+    setSorting(prev => ({
+      field,
+      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const getSortIcon = (field) => {
+    if (sorting.field !== field) return <FaSort />;
+    return sorting.direction === 'asc' ? <FaSortUp /> : <FaSortDown />;
+  };
+
+  // Appliquer le tri après les filtres
+  const displayedAlbums = sortData(searchResults || filteredAlbums || []);
+
   if (isLoading) return (
     <div className="loading-state">
       <div className="spinner"></div>
@@ -397,16 +457,26 @@ function AlbumList() {
           <thead>
             <tr>
               <th style={{ width: '60px' }}></th>
-              <th>{t('albums.table.title')}</th>
-              <th>{t('albums.table.artist')}</th>
-              <th>{t('albums.table.genre')}</th>
-              <th>{t('albums.table.year')}</th>
-              <th>{t('albums.table.tracks')}</th>
+              <th onClick={() => handleSort('title')} className="sortable">
+                {t('albums.table.title')} {getSortIcon('title')}
+              </th>
+              <th onClick={() => handleSort('artist')} className="sortable">
+                {t('albums.table.artist')} {getSortIcon('artist')}
+              </th>
+              <th onClick={() => handleSort('genre')} className="sortable">
+                {t('albums.table.genre')} {getSortIcon('genre')}
+              </th>
+              <th onClick={() => handleSort('year')} className="sortable">
+                {t('albums.table.year')} {getSortIcon('year')}
+              </th>
+              <th onClick={() => handleSort('tracks')} className="sortable">
+                {t('albums.table.tracks')} {getSortIcon('tracks')}
+              </th>
               <th>{t('albums.table.actions')}</th>
             </tr>
           </thead>
           <tbody>
-            {filteredAlbums.map(album => (
+            {displayedAlbums.map(album => (
               <tr key={album._id}>
                 <td className="image-cell">
                   <div className="album-cover">

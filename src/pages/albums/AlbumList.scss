@@ -65,6 +65,26 @@
       th, td {
         vertical-align: middle;
       }
+
+      th.sortable {
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        
+        &:hover {
+          background-color: rgba($secondary-color, 0.7);
+        }
+
+        svg {
+          margin-left: $spacing-xs;
+          vertical-align: middle;
+          opacity: 0.5;
+        }
+
+        &:hover svg {
+          opacity: 1;
+        }
+      }
     }
   }
 }

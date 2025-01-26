@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
@@ -35,6 +35,11 @@ function ArtistList() {
   });
   
   const [showFilters, setShowFilters] = useState(false);
+
+  const [sorting, setSorting] = useState({
+    field: 'name',
+    direction: 'asc'
+  });
 
   const { data: artists, isLoading, error, refetch } = useQuery({
     queryKey: ['artists'],
@@ -199,7 +204,46 @@ function ArtistList() {
   const uniqueGenres = [...new Set(artists?.map(artist => artist.genre) || [])];
   const uniqueCountries = [...new Set(artists?.map(artist => artist.country) || [])];
 
-  const displayedArtists = searchResults || filteredArtists || [];
+  // Fonction de tri
+  const sortData = (data) => {
+    if (!data) return [];
+    
+    return [...data].sort((a, b) => {
+      let aValue = a[sorting.field];
+      let bValue = b[sorting.field];
+
+      // Gestion spéciale pour certains champs
+      if (sorting.field === 'albums') {
+        aValue = a.albums?.length || 0;
+        bValue = b.albums?.length || 0;
+      }
+
+      // Conversion en minuscules pour les chaînes
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return sorting.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sorting.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const handleSort = (field) => {
+    setSorting(prev => ({
+      field,
+      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const getSortIcon = (field) => {
+    if (sorting.field !== field) return <FaSort />;
+    return sorting.direction === 'asc' ? <FaSortUp /> : <FaSortDown />;
+  };
+
+  // Appliquer le tri après les filtres
+  const displayedArtists = sortData(searchResults || filteredArtists || []);
 
   if (isLoading) return (
     <div className="loading-state">
@@ -370,9 +414,18 @@ function ArtistList() {
         <table>
           <thead>
             <tr>
-              <th>{t('artists.table.name')}</th>
-              <th>{t('artists.table.genre')}</th>
-              <th>{t('artists.table.followers')}</th>
+              <th onClick={() => handleSort('name')} className="sortable">
+                {t('artists.table.name')} {getSortIcon('name')}
+              </th>
+              <th onClick={() => handleSort('genre')} className="sortable">
+                {t('artists.table.genre')} {getSortIcon('genre')}
+              </th>
+              <th onClick={() => handleSort('popularity')} className="sortable">
+                {t('artists.table.followers')} {getSortIcon('popularity')}
+              </th>
+              <th onClick={() => handleSort('albums')} className="sortable">
+                {t('artists.table.albums')} {getSortIcon('albums')}
+              </th>
               <th>{t('artists.table.actions')}</th>
             </tr>
           </thead>
@@ -382,6 +435,7 @@ function ArtistList() {
                 <td>{artist.name}</td>
                 <td>{artist.genre}</td>
                 <td>{artist.popularity}%</td>
+                <td>{artist.albums?.length || 0}</td>
                 <td className="actions">
                   <button 
                     className="btn btn--icon"

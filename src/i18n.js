@@ -51,7 +51,10 @@ i18n
               "name": "Name",
               "genre": "Genre",
               "followers": "Followers",
-              "actions": "Actions"
+              "actions": "Actions",
+              "albums": "Albums",
+              "sortAsc": "Sort ascending",
+              "sortDesc": "Sort descending"
             },
             "form": {
               "title": {
@@ -84,7 +87,8 @@ i18n
               "artist": "Artist",
               "year": "Release Year",
               "tracks": "Tracks",
-              "actions": "Actions"
+              "actions": "Actions",
+              "genre": "Music Genre"
             },
             "form": {
               "title": {
@@ -195,7 +199,10 @@ i18n
               "name": "Nom",
               "genre": "Genre",
               "followers": "Abonnés",
-              "actions": "Actions"
+              "actions": "Actions",
+              "albums": "Albums",
+              "sortAsc": "Tri croissant",
+              "sortDesc": "Tri décroissant"
             },
             "form": {
               "title": {
@@ -228,7 +235,8 @@ i18n
               "artist": "Artiste",
               "year": "Année de Sortie",
               "tracks": "Pistes",
-              "actions": "Actions"
+              "actions": "Actions",
+              "genre": "Genre Musical"
             },
             "form": {
               "title": {
@@ -339,7 +347,10 @@ i18n
               "name": "الاسم",
               "genre": "النوع",
               "followers": "المتابعون",
-              "actions": "الإجراءات"
+              "actions": "الإجراءات",
+              "albums": "الألبومات",
+              "sortAsc": "ترتيب تصاعدي",
+              "sortDesc": "ترتيب تنازلي"
             },
             "form": {
               "title": {
@@ -372,7 +383,8 @@ i18n
               "artist": "الفنان",
               "year": "سنة الإصدار",
               "tracks": "المقطوعات",
-              "actions": "الإجراءات"
+              "actions": "الإجراءات",
+              "genre": "النوع الموسيقي"
             },
             "form": {
               "title": {
