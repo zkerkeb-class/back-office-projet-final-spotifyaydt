@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
@@ -12,6 +12,7 @@ import { ErrorState } from '../../components/ErrorState/ErrorState';
 function ArtistList() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [searchResults, setSearchResults] = React.useState(null);
 
   const { data: artists, isLoading, error, refetch } = useQuery({
@@ -22,6 +23,17 @@ function ArtistList() {
     refetchOnWindowFocus: false,
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (artistId) => api.delete(`/artists/${artistId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['artists']);
+    },
+    onError: (error) => {
+      console.error('Erreur lors de la suppression:', error);
+      alert(t('artists.deleteError'));
+    }
+  });
+
   const handleSearch = (query) => {
     if (!query || query.trim() === '') {
       setSearchResults(null);
@@ -29,6 +41,16 @@ function ArtistList() {
     }
     const results = phoneticSearch(query.trim(), artists, 'name', 0.3);
     setSearchResults(results);
+  };
+
+  const handleDelete = async (artistId) => {
+    if (window.confirm(t('artists.confirmDelete'))) {
+      try {
+        await deleteMutation.mutateAsync(artistId);
+      } catch (error) {
+        // L'erreur est déjà gérée dans onError de la mutation
+      }
+    }
   };
 
   const displayedArtists = searchResults || artists || [];
@@ -88,12 +110,9 @@ function ArtistList() {
                   </button>
                   <button 
                     className="btn btn--icon btn--danger"
-                    onClick={() => {
-                      if (window.confirm(t('artists.confirmDelete'))) {
-                        console.log('delete');
-                      }
-                    }}
+                    onClick={() => handleDelete(artist._id)}
                     aria-label={t('artists.delete')}
+                    disabled={deleteMutation.isLoading}
                   >
                     <FaTrash />
                   </button>
