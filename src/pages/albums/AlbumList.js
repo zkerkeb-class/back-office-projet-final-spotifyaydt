@@ -1,19 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter } from 'react-icons/fa';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
-import SearchBar from '../../components/SearchBar/SearchBar';
-import { ErrorState } from '../../components/ErrorState/ErrorState';
 import './AlbumList.scss';
+
+const SEARCH_HISTORY_KEY = 'albumSearchHistory';
+const MAX_HISTORY_ITEMS = 5;
 
 function AlbumList() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [searchResults, setSearchResults] = React.useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchHistory, setSearchHistory] = useState(() => {
+    const saved = localStorage.getItem(SEARCH_HISTORY_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // États pour les filtres
+  const [filters, setFilters] = useState({
+    artist: '',
+    genre: '',
+    yearStart: '',
+    yearEnd: '',
+    durationMin: '',
+    durationMax: '',
+    popularity: '',
+    playlist: ''
+  });
+  
+  const [showFilters, setShowFilters] = useState(false);
 
   const { data: albums, isLoading, error, refetch } = useQuery({
     queryKey: ['albums'],
@@ -22,6 +44,88 @@ function AlbumList() {
     staleTime: 30000,
     refetchOnWindowFocus: false,
   });
+
+  const { data: artists } = useQuery({
+    queryKey: ['artists'],
+    queryFn: () => api.get('/artists')
+  });
+
+  const { data: playlists } = useQuery({
+    queryKey: ['playlists'],
+    queryFn: () => api.get('/playlists')
+  });
+
+  // Gestion de l'historique des recherches
+  const addToHistory = (term) => {
+    if (!term.trim()) return;
+    
+    const newHistory = [
+      term,
+      ...searchHistory.filter(item => item !== term)
+    ].slice(0, MAX_HISTORY_ITEMS);
+    
+    setSearchHistory(newHistory);
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+  };
+
+  // Auto-complétion intelligente
+  useEffect(() => {
+    if (searchTerm.trim() && albums) {
+      const allTitles = albums
+        .map(album => album.title)
+        .filter(Boolean);
+        
+      const allArtists = albums
+        .map(album => album.artist?.name)
+        .filter(Boolean);
+        
+      const allTerms = [...new Set([...allTitles, ...allArtists])];
+      
+      const matches = allTerms.filter(term => {
+        if (!term) return false;
+        const normalizedTerm = term.toString().toLowerCase();
+        const normalizedSearch = searchTerm.toLowerCase();
+        return normalizedTerm.includes(normalizedSearch) ||
+          phoneticSearch(searchTerm, [term]).length > 0;
+      });
+
+      setSuggestions(matches.slice(0, 5));
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchTerm, albums]);
+
+  // Recherche phonétique améliorée
+  const handleSearch = (term) => {
+    const searchTerm = term.trim();
+    if (!searchTerm || !albums) {
+      setSearchResults(null);
+      return;
+    }
+
+    const results = albums.filter(album => {
+      const titleMatch = album.title && 
+        phoneticSearch(searchTerm, [album.title]).length > 0;
+        
+      const artistMatch = album.artist?.name && 
+        phoneticSearch(searchTerm, [album.artist.name]).length > 0;
+        
+      return titleMatch || artistMatch;
+    });
+
+    setSearchResults(results);
+    if (searchTerm) {
+      addToHistory(searchTerm);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchTerm(suggestion);
+    handleSearch(suggestion);
+    setShowSuggestions(false);
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (albumId) => api.delete(`/albums/${albumId}`),
@@ -34,15 +138,6 @@ function AlbumList() {
     }
   });
 
-  const handleSearch = (query) => {
-    if (!query || query.trim() === '') {
-      setSearchResults(null);
-      return;
-    }
-    const results = phoneticSearch(query.trim(), albums, 'title', 0.3);
-    setSearchResults(results);
-  };
-
   const handleDelete = async (albumId) => {
     if (window.confirm(t('albums.confirmDelete'))) {
       try {
@@ -53,7 +148,81 @@ function AlbumList() {
     }
   };
 
-  const displayedAlbums = searchResults || albums || [];
+  // Fonction pour appliquer les filtres
+  const getFilteredAlbums = () => {
+    if (!albums) return [];
+
+    return albums.filter(album => {
+      // Filtre par artiste
+      if (filters.artist && album.artist?._id !== filters.artist) {
+        return false;
+      }
+
+      // Filtre par genre
+      if (filters.genre && album.genre !== filters.genre) {
+        return false;
+      }
+
+      // Filtre par année
+      const albumYear = new Date(album.releaseDate).getFullYear();
+      if (filters.yearStart && albumYear < parseInt(filters.yearStart)) {
+        return false;
+      }
+      if (filters.yearEnd && albumYear > parseInt(filters.yearEnd)) {
+        return false;
+      }
+
+      // Filtre par durée
+      const totalDuration = album.tracks?.reduce((acc, track) => acc + track.duration, 0) || 0;
+      if (filters.durationMin && totalDuration < parseInt(filters.durationMin)) {
+        return false;
+      }
+      if (filters.durationMax && totalDuration > parseInt(filters.durationMax)) {
+        return false;
+      }
+
+      // Filtre par popularité
+      if (filters.popularity && album.popularity < parseInt(filters.popularity)) {
+        return false;
+      }
+
+      // Filtre par playlist
+      if (filters.playlist) {
+        const isInPlaylist = playlists?.some(playlist => 
+          playlist._id === filters.playlist && 
+          playlist.tracks?.some(track => track.album === album._id)
+        );
+        if (!isInPlaylist) return false;
+      }
+
+      return true;
+    });
+  };
+
+  const handleFilterChange = (name, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      artist: '',
+      genre: '',
+      yearStart: '',
+      yearEnd: '',
+      durationMin: '',
+      durationMax: '',
+      popularity: '',
+      playlist: ''
+    });
+  };
+
+  const filteredAlbums = getFilteredAlbums();
+
+  // Extraire les genres uniques
+  const uniqueGenres = [...new Set(albums?.map(album => album.genre) || [])];
 
   if (isLoading) return (
     <div className="loading-state">
@@ -68,20 +237,159 @@ function AlbumList() {
     <div className="album-list">
       <div className="album-list__header">
         <h2>{t('albums.title')}</h2>
-        <button 
-          className="btn btn--primary"
-          onClick={() => navigate('/albums/new')}
-        >
-          <FaPlus />
-          {t('albums.add')}
-        </button>
+        <div className="header-actions">
+          <button 
+            className="btn btn--secondary"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <FaFilter />
+            {t('filters.toggle')}
+          </button>
+          <button 
+            className="btn btn--primary"
+            onClick={() => navigate('/albums/new')}
+          >
+            <FaPlus />
+            {t('albums.add')}
+          </button>
+        </div>
       </div>
 
+      {showFilters && (
+        <div className="filters-panel">
+          <div className="filters-grid">
+            <div className="filter-group">
+              <label>{t('filters.artist')}</label>
+              <select
+                value={filters.artist}
+                onChange={(e) => handleFilterChange('artist', e.target.value)}
+              >
+                <option value="">{t('filters.allArtists')}</option>
+                {artists?.map(artist => (
+                  <option key={artist._id} value={artist._id}>
+                    {artist.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label>{t('filters.genre')}</label>
+              <select
+                value={filters.genre}
+                onChange={(e) => handleFilterChange('genre', e.target.value)}
+              >
+                <option value="">{t('filters.allGenres')}</option>
+                {uniqueGenres.map(genre => (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label>{t('filters.yearRange')}</label>
+              <div className="range-inputs">
+                <input
+                  type="number"
+                  placeholder={t('filters.from')}
+                  value={filters.yearStart}
+                  onChange={(e) => handleFilterChange('yearStart', e.target.value)}
+                />
+                <input
+                  type="number"
+                  placeholder={t('filters.to')}
+                  value={filters.yearEnd}
+                  onChange={(e) => handleFilterChange('yearEnd', e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label>{t('filters.popularity')}</label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={filters.popularity}
+                onChange={(e) => handleFilterChange('popularity', e.target.value)}
+              />
+              <span>{filters.popularity || 0}%</span>
+            </div>
+
+            <div className="filter-group">
+              <label>{t('filters.playlist')}</label>
+              <select
+                value={filters.playlist}
+                onChange={(e) => handleFilterChange('playlist', e.target.value)}
+              >
+                <option value="">{t('filters.allPlaylists')}</option>
+                {playlists?.map(playlist => (
+                  <option key={playlist._id} value={playlist._id}>
+                    {playlist.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="filters-actions">
+            <button 
+              className="btn btn--secondary"
+              onClick={resetFilters}
+            >
+              {t('filters.reset')}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="album-list__search">
-        <SearchBar
-          placeholder={t('albums.search')}
-          onSearch={handleSearch}
-        />
+        <div className="search-container">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch(searchTerm)}
+            placeholder={t('albums.search')}
+            className="search-input"
+          />
+          <FaSearch className="search-icon" onClick={() => handleSearch(searchTerm)} />
+          
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="suggestions-dropdown">
+              {suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="suggestion-item"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {searchHistory.length > 0 && (
+          <div className="search-history">
+            <h4>
+              <FaHistory /> {t('search.recentSearches')}
+            </h4>
+            <div className="history-items">
+              {searchHistory.map((term, index) => (
+                <button
+                  key={index}
+                  className="history-item"
+                  onClick={() => handleSuggestionClick(term)}
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="album-list__table">
@@ -98,7 +406,7 @@ function AlbumList() {
             </tr>
           </thead>
           <tbody>
-            {displayedAlbums.map(album => (
+            {filteredAlbums.map(album => (
               <tr key={album._id}>
                 <td className="image-cell">
                   <div className="album-cover">

@@ -93,4 +93,136 @@
       background-color: rgba($error-color, 0.1);
     }
   }
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: $spacing-md;
+
+  .search-input {
+    width: 100%;
+    padding: $spacing-sm $spacing-xl $spacing-sm $spacing-md;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    font-size: $font-size-md;
+  }
+
+  .search-icon {
+    position: absolute;
+    right: $spacing-md;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text-color;
+    opacity: 0.5;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--background-color);
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  z-index: 10;
+
+  .suggestion-item {
+    padding: $spacing-sm $spacing-md;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba($primary-color, 0.1);
+    }
+  }
+}
+
+.search-history {
+  margin-top: $spacing-md;
+
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    color: $text-color;
+    opacity: 0.7;
+    font-size: $font-size-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  .history-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+
+  .history-item {
+    background: rgba($secondary-color, 0.1);
+    border: none;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    color: $text-color;
+
+    &:hover {
+      background: rgba($secondary-color, 0.2);
+    }
+  }
+}
+
+.filters-panel {
+  background: rgba($secondary-color, 0.1);
+  border-radius: $border-radius;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-xl;
+
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-lg;
+  }
+
+  .filter-group {
+    @include flex(column);
+    gap: $spacing-sm;
+
+    label {
+      font-weight: 500;
+      color: $text-color;
+    }
+
+    select, input {
+      @include input-field;
+    }
+
+    .range-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: $spacing-sm;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: $spacing-xs 0;
+    }
+  }
+
+  .filters-actions {
+    margin-top: $spacing-lg;
+    @include flex(row, flex-end);
+  }
+}
+
+.header-actions {
+  @include flex(row);
+  gap: $spacing-md;
 } 

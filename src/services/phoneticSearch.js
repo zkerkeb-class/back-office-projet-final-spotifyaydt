@@ -42,26 +42,73 @@ function calculateSimilarity(str1, str2) {
 }
 
 // Fonction de recherche phonétique
-export function phoneticSearch(query, items, field = 'name', threshold = 0.3) {
-  if (!query) return items;
+export const phoneticSearch = (query, items, field = '', threshold = 0.3) => {
+  if (!query || !items || !Array.isArray(items)) return [];
 
-  const queryPhonetic = getFrenchPhoneticCode(query);
-  
-  return items.map(item => ({
-    item,
-    similarity: Math.max(
-      // Vérifier la similarité phonétique
-      calculateSimilarity(query, item[field]),
-      // Vérifier si le terme de recherche est inclus dans le nom
-      item[field].toLowerCase().includes(query.toLowerCase()) ? 1 : 0,
-      // Vérifier si le nom commence par le terme de recherche
-      item[field].toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0
-    )
-  }))
-  .filter(({ similarity }) => similarity >= threshold)
-  .sort((a, b) => b.similarity - a.similarity)
-  .map(({ item }) => item);
-}
+  // Fonction pour obtenir la valeur à comparer
+  const getValue = (item) => {
+    if (!item) return '';
+    if (field) {
+      return item[field]?.toString() || '';
+    }
+    return item?.toString() || '';
+  };
+
+  // Fonction pour calculer la distance de Levenshtein
+  const levenshtein = (a, b) => {
+    if (!a || !b) return 0;
+    const matrix = [];
+
+    for (let i = 0; i <= b.length; i++) {
+      matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= a.length; j++) {
+      matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+
+    return matrix[b.length][a.length];
+  };
+
+  // Normaliser le texte
+  const normalize = (text) => {
+    if (!text) return '';
+    return text.toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  };
+
+  const normalizedQuery = normalize(query);
+
+  return items.filter(item => {
+    const value = normalize(getValue(item));
+    if (!value) return false;
+
+    // Distance de Levenshtein normalisée
+    const maxLength = Math.max(normalizedQuery.length, value.length);
+    if (maxLength === 0) return false;
+
+    const distance = levenshtein(normalizedQuery, value);
+    const similarity = 1 - distance / maxLength;
+
+    return similarity >= threshold;
+  });
+};
 
 // Fonction de suggestion d'artistes similaires
 export function findSimilarArtists(artist, allArtists, maxSuggestions = 5) {
