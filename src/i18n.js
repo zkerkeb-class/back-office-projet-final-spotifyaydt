@@ -51,7 +51,10 @@ i18n
               "name": "Name",
               "genre": "Genre",
               "followers": "Followers",
-              "actions": "Actions"
+              "actions": "Actions",
+              "albums": "Albums",
+              "sortAsc": "Sort ascending",
+              "sortDesc": "Sort descending"
             },
             "form": {
               "title": {
@@ -84,7 +87,8 @@ i18n
               "artist": "Artist",
               "year": "Release Year",
               "tracks": "Tracks",
-              "actions": "Actions"
+              "actions": "Actions",
+              "genre": "Music Genre"
             },
             "form": {
               "title": {
@@ -117,6 +121,35 @@ i18n
           "common": {
             "save": "Save",
             "cancel": "Cancel"
+          },
+          "search": {
+            "recentSearches": "Recent searches",
+            "noResults": "No results",
+            "placeholder": "Search..."
+          },
+          "filters": {
+            "toggle": "Filters",
+            "artist": "Artist",
+            "genre": "Genre",
+            "yearRange": "Release Year",
+            "from": "From",
+            "to": "To",
+            "duration": "Duration",
+            "popularity": "Popularity",
+            "playlist": "Playlist",
+            "reset": "Reset Filters",
+            "allArtists": "All Artists",
+            "allGenres": "All Genres",
+            "allPlaylists": "All Playlists",
+            "minutes": "minutes",
+            "apply": "Apply Filters",
+            "name": "Name",
+            "namePlaceholder": "Search by name...",
+            "country": "Country",
+            "allCountries": "All Countries",
+            "albumCount": "Minimum Albums",
+            "yearActive": "Year Active",
+            "yearActivePlaceholder": "Enter year..."
           }
         }
       },
@@ -166,7 +199,10 @@ i18n
               "name": "Nom",
               "genre": "Genre",
               "followers": "Abonnés",
-              "actions": "Actions"
+              "actions": "Actions",
+              "albums": "Albums",
+              "sortAsc": "Tri croissant",
+              "sortDesc": "Tri décroissant"
             },
             "form": {
               "title": {
@@ -199,7 +235,8 @@ i18n
               "artist": "Artiste",
               "year": "Année de Sortie",
               "tracks": "Pistes",
-              "actions": "Actions"
+              "actions": "Actions",
+              "genre": "Genre Musical"
             },
             "form": {
               "title": {
@@ -232,6 +269,35 @@ i18n
           "common": {
             "save": "Enregistrer",
             "cancel": "Annuler"
+          },
+          "search": {
+            "recentSearches": "Recherches récentes",
+            "noResults": "Aucun résultat",
+            "placeholder": "Rechercher..."
+          },
+          "filters": {
+            "toggle": "Filtres",
+            "artist": "Artiste",
+            "genre": "Genre",
+            "yearRange": "Année de sortie",
+            "from": "De",
+            "to": "À",
+            "duration": "Durée",
+            "popularity": "Popularité",
+            "playlist": "Playlist",
+            "reset": "Réinitialiser les filtres",
+            "allArtists": "Tous les artistes",
+            "allGenres": "Tous les genres",
+            "allPlaylists": "Toutes les playlists",
+            "minutes": "minutes",
+            "apply": "Appliquer les filtres",
+            "name": "Nom",
+            "namePlaceholder": "Rechercher par nom...",
+            "country": "Pays",
+            "allCountries": "Tous les pays",
+            "albumCount": "Nombre d'albums minimum",
+            "yearActive": "Année d'activité",
+            "yearActivePlaceholder": "Entrer l'année..."
           }
         }
       },
@@ -281,7 +347,10 @@ i18n
               "name": "الاسم",
               "genre": "النوع",
               "followers": "المتابعون",
-              "actions": "الإجراءات"
+              "actions": "الإجراءات",
+              "albums": "الألبومات",
+              "sortAsc": "ترتيب تصاعدي",
+              "sortDesc": "ترتيب تنازلي"
             },
             "form": {
               "title": {
@@ -314,7 +383,8 @@ i18n
               "artist": "الفنان",
               "year": "سنة الإصدار",
               "tracks": "المقطوعات",
-              "actions": "الإجراءات"
+              "actions": "الإجراءات",
+              "genre": "النوع الموسيقي"
             },
             "form": {
               "title": {
@@ -347,6 +417,35 @@ i18n
           "common": {
             "save": "حفظ",
             "cancel": "إلغاء"
+          },
+          "search": {
+            "recentSearches": "عمليات البحث الأخيرة",
+            "noResults": "لا نتائج",
+            "placeholder": "بحث..."
+          },
+          "filters": {
+            "toggle": "الفلاتر",
+            "artist": "الفنان",
+            "genre": "النوع",
+            "yearRange": "سنة الإصدار",
+            "from": "من",
+            "to": "إلى",
+            "duration": "المدة",
+            "popularity": "الشعبية",
+            "playlist": "قائمة التشغيل",
+            "reset": "إعادة تعيين الفلاتر",
+            "allArtists": "جميع الفنانين",
+            "allGenres": "جميع الأنواع",
+            "allPlaylists": "جميع قوائم التشغيل",
+            "minutes": "دقائق",
+            "apply": "تطبيق الفلاتر",
+            "name": "الاسم",
+            "namePlaceholder": "البحث بالاسم...",
+            "country": "البلد",
+            "allCountries": "كل البلدان",
+            "albumCount": "الحد الأدنى للألبومات",
+            "yearActive": "سنة النشاط",
+            "yearActivePlaceholder": "أدخل السنة..."
           }
         }
       }
