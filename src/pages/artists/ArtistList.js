@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
 import './ArtistList.scss';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
+import { usePermissions } from '../../components/Layout/Layout';
 
 const SEARCH_HISTORY_KEY = 'artistSearchHistory';
 const MAX_HISTORY_ITEMS = 5;
@@ -59,6 +60,8 @@ function ArtistList() {
       alert(t('artists.deleteError'));
     }
   });
+
+  const { canEdit, canManage } = usePermissions();
 
   // Gestion de l'historique des recherches
   const addToHistory = (term) => {
@@ -132,6 +135,7 @@ function ArtistList() {
   };
 
   const handleDelete = async (artistId) => {
+    if (!canManage()) return;
     if (window.confirm(t('artists.confirmDelete'))) {
       try {
         await deleteMutation.mutateAsync(artistId);
@@ -266,13 +270,12 @@ function ArtistList() {
             <FaFilter />
             {t('filters.toggle')}
           </button>
-          <button 
-            className="btn btn--primary"
-            onClick={() => navigate('/artists/new')}
-          >
-            <FaPlus />
-            {t('artists.add')}
-          </button>
+          {canManage() && (
+            <Link to="/artists/new" className="btn btn--primary">
+              <FaPlus />
+              <span>{t('artists.add')}</span>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -426,7 +429,7 @@ function ArtistList() {
               <th onClick={() => handleSort('albums')} className="sortable">
                 {t('artists.table.albums')} {getSortIcon('albums')}
               </th>
-              <th>{t('artists.table.actions')}</th>
+              {(canEdit() || canManage()) && <th>{t('artists.table.actions')}</th>}
             </tr>
           </thead>
           <tbody>
@@ -436,23 +439,29 @@ function ArtistList() {
                 <td>{artist.genre}</td>
                 <td>{artist.popularity}%</td>
                 <td>{artist.albums?.length || 0}</td>
-                <td className="actions">
-                  <button 
-                    className="btn btn--icon"
-                    onClick={() => navigate(`/artists/edit/${artist._id}`)}
-                    aria-label={t('artists.form.title.edit')}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button 
-                    className="btn btn--icon btn--danger"
-                    onClick={() => handleDelete(artist._id)}
-                    aria-label={t('artists.delete')}
-                    disabled={deleteMutation.isLoading}
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
+                {(canEdit() || canManage()) && (
+                  <td className="actions">
+                    {canEdit() && (
+                      <Link 
+                        to={`/artists/edit/${artist._id}`}
+                        className="btn btn--icon"
+                        aria-label={t('artists.form.title.edit')}
+                      >
+                        <FaEdit />
+                      </Link>
+                    )}
+                    {canManage() && (
+                      <button
+                        onClick={() => handleDelete(artist._id)}
+                        className="btn btn--icon btn--danger"
+                        aria-label={t('artists.delete')}
+                        disabled={deleteMutation.isLoading}
+                      >
+                        <FaTrash />
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -12,7 +12,8 @@ i18n
             "metrics": "Metrics",
             "artists": "Artists",
             "albums": "Albums",
-            "main": "Main navigation"
+            "main": "Main navigation",
+            "roles": "Roles"
           },
           "theme": {
             "light": "Light mode",
@@ -85,10 +86,10 @@ i18n
             "table": {
               "title": "Title",
               "artist": "Artist",
-              "year": "Release Year",
+              "genre": "Genre",
+              "releaseDate": "Release Date",
               "tracks": "Tracks",
-              "actions": "Actions",
-              "genre": "Music Genre"
+              "actions": "Actions"
             },
             "form": {
               "title": {
@@ -150,6 +151,48 @@ i18n
             "albumCount": "Minimum Albums",
             "yearActive": "Year Active",
             "yearActivePlaceholder": "Enter year..."
+          },
+          "roles": {
+            "title": "Gestion des Rôles",
+            "admin": {
+              "name": "Administrateur",
+              "description": "Accès complet à toutes les fonctionnalités du système"
+            },
+            "editor": {
+              "name": "Éditeur",
+              "description": "Peut modifier le contenu existant mais ne peut pas ajouter ou supprimer"
+            },
+            "viewer": {
+              "name": "Observateur",
+              "description": "Peut uniquement visualiser le contenu et les statistiques"
+            },
+            "permissions": {
+              "title": "Permissions",
+              "manageUsers": "Gérer les utilisateurs",
+              "manageRoles": "Gérer les rôles",
+              "manageContent": "Gérer tout le contenu",
+              "editContent": "Modifier le contenu existant",
+              "viewContent": "Visualiser le contenu",
+              "viewStats": "Voir les statistiques"
+            },
+            "users": {
+              "title": "Gestion des Utilisateurs",
+              "email": "Email",
+              "role": "Rôle",
+              "actions": "Actions",
+              "editRole": "Modifier le rôle",
+              "selectRole": "Sélectionner un rôle"
+            },
+            "lastActivity": "Last activity",
+            "stats": {
+              "title": "Statistics",
+              "actionsPerDay": "Actions per day",
+              "recentActivity": "Recent activity"
+            }
+          },
+          "common": {
+            "accessDenied": "Accès Refusé",
+            "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
           }
         }
       },
@@ -160,7 +203,8 @@ i18n
             "metrics": "Métriques",
             "artists": "Artistes",
             "albums": "Albums",
-            "main": "Navigation principale"
+            "main": "Navigation principale",
+            "roles": "Rôles"
           },
           "theme": {
             "light": "Mode clair",
@@ -233,10 +277,10 @@ i18n
             "table": {
               "title": "Titre",
               "artist": "Artiste",
-              "year": "Année de Sortie",
+              "genre": "Genre Musical",
+              "releaseDate": "Date de sortie",
               "tracks": "Pistes",
-              "actions": "Actions",
-              "genre": "Genre Musical"
+              "actions": "Actions"
             },
             "form": {
               "title": {
@@ -298,6 +342,48 @@ i18n
             "albumCount": "Nombre d'albums minimum",
             "yearActive": "Année d'activité",
             "yearActivePlaceholder": "Entrer l'année..."
+          },
+          "roles": {
+            "title": "Gestion des Rôles",
+            "admin": {
+              "name": "Administrateur",
+              "description": "Accès complet à toutes les fonctionnalités du système"
+            },
+            "editor": {
+              "name": "Éditeur",
+              "description": "Peut modifier le contenu existant mais ne peut pas ajouter ou supprimer"
+            },
+            "viewer": {
+              "name": "Observateur",
+              "description": "Peut uniquement visualiser le contenu et les statistiques"
+            },
+            "permissions": {
+              "title": "Permissions",
+              "manageUsers": "Gérer les utilisateurs",
+              "manageRoles": "Gérer les rôles",
+              "manageContent": "Gérer tout le contenu",
+              "editContent": "Modifier le contenu existant",
+              "viewContent": "Visualiser le contenu",
+              "viewStats": "Voir les statistiques"
+            },
+            "users": {
+              "title": "Gestion des Utilisateurs",
+              "email": "Email",
+              "role": "Rôle",
+              "actions": "Actions",
+              "editRole": "Modifier le rôle",
+              "selectRole": "Sélectionner un rôle"
+            },
+            "lastActivity": "Dernière activité",
+            "stats": {
+              "title": "Statistiques",
+              "actionsPerDay": "Actions par jour",
+              "recentActivity": "Activité récente"
+            }
+          },
+          "common": {
+            "accessDenied": "Accès Refusé",
+            "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
           }
         }
       },
@@ -308,7 +394,8 @@ i18n
             "metrics": "المقاييس",
             "artists": "الفنانون",
             "albums": "الألبومات",
-            "main": "التنقل الرئيسي"
+            "main": "التنقل الرئيسي",
+            "roles": "الأدوار"
           },
           "theme": {
             "light": "الوضع الفاتح",
@@ -446,6 +533,48 @@ i18n
             "albumCount": "الحد الأدنى للألبومات",
             "yearActive": "سنة النشاط",
             "yearActivePlaceholder": "أدخل السنة..."
+          },
+          "roles": {
+            "title": "إدارة الأدوار",
+            "admin": {
+              "name": "المدير",
+              "description": "الوصول إلى جميع الميزات المتاحة في النظام"
+            },
+            "editor": {
+              "name": "المحرر",
+              "description": "يمكنه تعديل المحتوى الموجود ولكن لا يمكنه إضافة أو حذفه"
+            },
+            "viewer": {
+              "name": "المشاهد",
+              "description": "يمكنه فقط عرض المحتوى والإحصائيات"
+            },
+            "permissions": {
+              "title": "الصلاحيات",
+              "manageUsers": "إدارة المستخدمين",
+              "manageRoles": "إدارة الأدوار",
+              "manageContent": "إدارة كل المحتوى",
+              "editContent": "تعديل المحتوى الموجود",
+              "viewContent": "عرض المحتوى",
+              "viewStats": "إظهار الإحصائيات"
+            },
+            "users": {
+              "title": "إدارة المستخدمين",
+              "email": "البريد الإلكتروني",
+              "role": "الدور",
+              "actions": "الإجراءات",
+              "editRole": "تعديل الدور",
+              "selectRole": "اختر الدور"
+            },
+            "lastActivity": "آخر نشاط",
+            "stats": {
+              "title": "الإحصائيات",
+              "actionsPerDay": "الإجراءات في اليوم",
+              "recentActivity": "النشاط الأخير"
+            }
+          },
+          "common": {
+            "accessDenied": "إصرار الوصول",
+            "noPermission": "لا تمتلك الصلاحيات اللازمة للوصول إلى هذه الصفحة"
           }
         }
       }

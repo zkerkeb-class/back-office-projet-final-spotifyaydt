@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
+import { usePermissions } from '../../components/Layout/Layout';
 import './AlbumList.scss';
 
 const SEARCH_HISTORY_KEY = 'albumSearchHistory';
@@ -59,6 +60,8 @@ function AlbumList() {
     queryKey: ['playlists'],
     queryFn: () => api.get('/playlists')
   });
+
+  const { canEdit, canManage } = usePermissions();
 
   // Gestion de l'historique des recherches
   const addToHistory = (term) => {
@@ -144,11 +147,12 @@ function AlbumList() {
   });
 
   const handleDelete = async (albumId) => {
+    if (!canManage()) return;
     if (window.confirm(t('albums.confirmDelete'))) {
       try {
         await deleteMutation.mutateAsync(albumId);
       } catch (error) {
-        // L'erreur est déjà gérée dans onError de la mutation
+        console.error('Error deleting album:', error);
       }
     }
   };
@@ -305,13 +309,12 @@ function AlbumList() {
             <FaFilter />
             {t('filters.toggle')}
           </button>
-          <button 
-            className="btn btn--primary"
-            onClick={() => navigate('/albums/new')}
-          >
-            <FaPlus />
-            {t('albums.add')}
-          </button>
+          {canManage() && (
+            <Link to="/albums/new" className="btn btn--primary">
+              <FaPlus />
+              <span>{t('albums.add')}</span>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -456,7 +459,6 @@ function AlbumList() {
         <table>
           <thead>
             <tr>
-              <th style={{ width: '60px' }}></th>
               <th onClick={() => handleSort('title')} className="sortable">
                 {t('albums.table.title')} {getSortIcon('title')}
               </th>
@@ -466,45 +468,46 @@ function AlbumList() {
               <th onClick={() => handleSort('genre')} className="sortable">
                 {t('albums.table.genre')} {getSortIcon('genre')}
               </th>
-              <th onClick={() => handleSort('year')} className="sortable">
-                {t('albums.table.year')} {getSortIcon('year')}
+              <th onClick={() => handleSort('releaseDate')} className="sortable">
+                {t('albums.table.releaseDate')} {getSortIcon('releaseDate')}
               </th>
               <th onClick={() => handleSort('tracks')} className="sortable">
                 {t('albums.table.tracks')} {getSortIcon('tracks')}
               </th>
-              <th>{t('albums.table.actions')}</th>
+              {(canEdit() || canManage()) && <th>{t('albums.table.actions')}</th>}
             </tr>
           </thead>
           <tbody>
             {displayedAlbums.map(album => (
               <tr key={album._id}>
-                <td className="image-cell">
-                  <div className="album-cover">
-                    <img src={album.coverImage} alt={album.title} />
-                  </div>
-                </td>
                 <td>{album.title}</td>
                 <td>{album.artist?.name || t('albums.unknownArtist')}</td>
                 <td>{album.genre}</td>
                 <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
                 <td>{album.tracks?.length || 0}</td>
-                <td className="actions">
-                  <button 
-                    className="btn btn--icon"
-                    onClick={() => navigate(`/albums/edit/${album._id}`)}
-                    aria-label={t('albums.form.title.edit')}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button 
-                    className="btn btn--icon btn--danger"
-                    onClick={() => handleDelete(album._id)}
-                    aria-label={t('albums.delete')}
-                    disabled={deleteMutation.isLoading}
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
+                {(canEdit() || canManage()) && (
+                  <td className="actions">
+                    {canEdit() && (
+                      <Link 
+                        to={`/albums/edit/${album._id}`}
+                        className="btn btn--icon"
+                        aria-label={t('albums.form.title.edit')}
+                      >
+                        <FaEdit />
+                      </Link>
+                    )}
+                    {canManage() && (
+                      <button 
+                        className="btn btn--icon btn--danger"
+                        onClick={() => handleDelete(album._id)}
+                        aria-label={t('albums.delete')}
+                        disabled={deleteMutation.isLoading}
+                      >
+                        <FaTrash />
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

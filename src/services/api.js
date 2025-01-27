@@ -1,4 +1,5 @@
 import { openDB } from 'idb';
+import { mockUsers } from '../mocks/auth';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 const DB_NAME = 'spotifyOfflineDB';
@@ -183,5 +184,26 @@ export const api = {
       console.error('API Error:', error);
       throw error;
     }
+  },
+
+  async login(credentials) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const user = mockUsers.find(
+          u => u.email === credentials.email && u.password === credentials.password
+        );
+
+        if (user) {
+          const token = btoa(JSON.stringify(user));
+          localStorage.setItem('token', token);
+          resolve({
+            user: { ...user, password: undefined },
+            token
+          });
+        } else {
+          reject(new Error('Invalid credentials'));
+        }
+      }, 500);
+    });
   }
 }; 
