@@ -7,6 +7,7 @@ import ArtistForm from './pages/artists/ArtistForm';
 import AlbumList from './pages/albums/AlbumList';
 import AlbumForm from './pages/albums/AlbumForm';
 import Login from './pages/Login';
+import RoleList from './pages/roles/RoleList';
 import { useOfflineMode } from './hooks/useOfflineMode';
 import { useAuth } from './contexts/AuthContext';
 
@@ -14,38 +15,82 @@ function Router() {
   useOfflineMode();
   const { user } = useAuth();
 
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
-      {/* Route de login accessible uniquement si non connecté */}
-      <Route 
-        path="/login" 
+      <Route
+        path="/"
         element={
-          user ? <Navigate to="/" replace /> : <Login />
-        } 
+          <Layout>
+            <Dashboard />
+          </Layout>
+        }
       />
-
-      {/* Routes protégées */}
-      <Route 
-        path="/*" 
+      <Route
+        path="/artists"
         element={
-          user ? (
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Navigate to="/metrics" replace />} />
-                <Route path="/metrics" element={<Dashboard />} />
-                <Route path="/artists" element={<ArtistList />} />
-                <Route path="/artists/new" element={<ArtistForm />} />
-                <Route path="/artists/edit/:id" element={<ArtistForm />} />
-                <Route path="/albums" element={<AlbumList />} />
-                <Route path="/albums/new" element={<AlbumForm />} />
-                <Route path="/albums/edit/:id" element={<AlbumForm />} />
-              </Routes>
-            </Layout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        } 
+          <Layout>
+            <ArtistList />
+          </Layout>
+        }
       />
+      <Route
+        path="/artists/new"
+        element={
+          <Layout>
+            <ArtistForm />
+          </Layout>
+        }
+      />
+      <Route
+        path="/artists/edit/:id"
+        element={
+          <Layout>
+            <ArtistForm />
+          </Layout>
+        }
+      />
+      <Route
+        path="/albums"
+        element={
+          <Layout>
+            <AlbumList />
+          </Layout>
+        }
+      />
+      <Route
+        path="/albums/new"
+        element={
+          <Layout>
+            <AlbumForm />
+          </Layout>
+        }
+      />
+      <Route
+        path="/albums/edit/:id"
+        element={
+          <Layout>
+            <AlbumForm />
+          </Layout>
+        }
+      />
+      <Route
+        path="/roles"
+        element={
+          <Layout>
+            <RoleList />
+          </Layout>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
