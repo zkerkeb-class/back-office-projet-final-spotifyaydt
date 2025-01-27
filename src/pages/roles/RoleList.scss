@@ -1,0 +1,355 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.role-list {
+  &__header {
+    @include flex(row, space-between, center);
+    margin-bottom: $spacing-xl;
+    
+    h2 {
+      color: $text-color;
+      margin: 0;
+    }
+
+    .header-actions {
+      @include flex(row, flex-end, center);
+      gap: $spacing-md;
+
+      .search-box {
+        @include flex(row, flex-start, center);
+        background: rgba($secondary-color, 0.1);
+        padding: $spacing-sm;
+        border-radius: $border-radius;
+        gap: $spacing-sm;
+
+        svg {
+          color: rgba($text-color, 0.5);
+        }
+
+        input {
+          background: none;
+          border: none;
+          color: $text-color;
+          outline: none;
+          min-width: 200px;
+
+          &::placeholder {
+            color: rgba($text-color, 0.5);
+          }
+        }
+      }
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: $spacing-lg;
+  }
+}
+
+.role-card {
+  background: rgba($secondary-color, 0.3);
+  border-radius: $border-radius;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $box-shadow;
+  }
+
+  &.selected {
+    border: 2px solid $primary-color;
+  }
+
+  &__header {
+    background: rgba($primary-color, 0.1);
+    padding: $spacing-md;
+    border-bottom: 1px solid rgba($text-color, 0.1);
+    @include flex(row, space-between, center);
+
+    .role-icon {
+      font-size: 1.5rem;
+      color: $primary-color;
+    }
+
+    h3 {
+      margin: 0;
+      color: $primary-color;
+    }
+
+    .user-count {
+      @include flex(row, center, center);
+      gap: $spacing-xs;
+      color: rgba($text-color, 0.7);
+      font-size: 0.9rem;
+    }
+  }
+
+  &__content {
+    padding: $spacing-md;
+
+    .role-description {
+      margin-bottom: $spacing-md;
+      color: rgba($text-color, 0.8);
+    }
+
+    .permissions-list {
+      h4 {
+        margin-bottom: $spacing-sm;
+        color: $text-color;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          padding: $spacing-xs 0;
+          color: rgba($text-color, 0.8);
+          @include flex(row, flex-start, center);
+          gap: $spacing-xs;
+
+          &::before {
+            content: "•";
+            color: $primary-color;
+          }
+        }
+      }
+    }
+  }
+
+  &__footer {
+    padding: $spacing-sm $spacing-md;
+    background: rgba($secondary-color, 0.2);
+    border-top: 1px solid rgba($text-color, 0.1);
+
+    .last-activity {
+      @include flex(row, flex-start, center);
+      gap: $spacing-xs;
+      color: rgba($text-color, 0.6);
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.role-stats {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid rgba($text-color, 0.1);
+
+  h4 {
+    margin-bottom: $spacing-md;
+    color: $text-color;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    .stat-item {
+      background: rgba($primary-color, 0.1);
+      padding: $spacing-sm;
+      border-radius: $border-radius-sm;
+      @include flex(column, center, center);
+      gap: $spacing-xs;
+
+      svg {
+        color: $primary-color;
+        font-size: 1.2rem;
+      }
+
+      span {
+        font-size: 0.9rem;
+        color: rgba($text-color, 0.7);
+      }
+
+      strong {
+        font-size: 1.2rem;
+        color: $text-color;
+      }
+    }
+  }
+
+  .recent-activity {
+    h5 {
+      margin-bottom: $spacing-sm;
+      color: $text-color;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        @include flex(row, space-between, center);
+        padding: $spacing-xs 0;
+        color: rgba($text-color, 0.8);
+        font-size: 0.9rem;
+
+        .date {
+          color: rgba($text-color, 0.6);
+        }
+
+        .action {
+          color: $primary-color;
+        }
+      }
+    }
+  }
+}
+
+.access-denied {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $text-color;
+
+  svg {
+    font-size: 3rem;
+    color: $error-color;
+    margin-bottom: $spacing-md;
+  }
+
+  h2 {
+    margin-bottom: $spacing-md;
+  }
+
+  p {
+    color: rgba($text-color, 0.8);
+  }
+}
+
+.users-section {
+  margin-top: $spacing-xl;
+  padding-top: $spacing-xl;
+  border-top: 1px solid rgba($text-color, 0.1);
+
+  h3 {
+    @include flex(row, flex-start, center);
+    gap: $spacing-sm;
+    margin-bottom: $spacing-lg;
+    color: $text-color;
+
+    svg {
+      color: $primary-color;
+    }
+  }
+}
+
+.users-table {
+  background: rgba($secondary-color, 0.3);
+  border-radius: $border-radius;
+  overflow: hidden;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+      padding: $spacing-md;
+      text-align: left;
+    }
+
+    th {
+      background: rgba($primary-color, 0.1);
+      color: $text-color;
+      font-weight: 600;
+    }
+
+    tr:not(:last-child) {
+      border-bottom: 1px solid rgba($text-color, 0.1);
+    }
+
+    td {
+      color: rgba($text-color, 0.8);
+    }
+  }
+}
+
+.role-badge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-sm;
+  font-size: 0.9rem;
+  font-weight: 500;
+
+  &.admin {
+    background: rgba($primary-color, 0.2);
+    color: $primary-color;
+  }
+
+  &.editor {
+    background: rgba($warning-color, 0.2);
+    color: $warning-color;
+  }
+
+  &.viewer {
+    background: rgba($text-color, 0.1);
+    color: $text-color;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: $background-color;
+  border-radius: $border-radius;
+  padding: $spacing-lg;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: $box-shadow-lg;
+
+  h3 {
+    margin-bottom: $spacing-lg;
+    color: $text-color;
+  }
+
+  .user-edit-form {
+    .form-group {
+      margin: $spacing-md 0;
+
+      label {
+        display: block;
+        margin-bottom: $spacing-xs;
+        color: rgba($text-color, 0.8);
+      }
+
+      select {
+        width: 100%;
+        padding: $spacing-sm;
+        border-radius: $border-radius-sm;
+        border: 1px solid rgba($text-color, 0.2);
+        background: $background-color;
+        color: $text-color;
+        outline: none;
+
+        &:focus {
+          border-color: $primary-color;
+        }
+      }
+    }
+  }
+
+  .modal-actions {
+    @include flex(row, flex-end, center);
+    margin-top: $spacing-lg;
+    gap: $spacing-sm;
+  }
+} 

@@ -1,0 +1,95 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.kpi-config-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.kpi-config {
+  position: relative;
+  background: $background-color;
+  padding: $spacing-lg;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-lg;
+  min-width: 300px;
+  max-width: 500px;
+  width: 90%;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 400px;
+  position: relative;
+  z-index: 1001;
+
+  &__header {
+    @include flex(row, space-between, center);
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid rgba($text-color, 0.1);
+
+    h3 {
+      margin: 0;
+    }
+
+    button {
+      background: none;
+      border: none;
+      font-size: $font-size-xl;
+      cursor: pointer;
+      color: $text-color;
+      opacity: 0.5;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__item {
+    background: rgba($secondary-color, 0.1);
+    padding: $spacing-md;
+    border-radius: $border-radius;
+
+    &-header {
+      @include flex(row, space-between, center);
+      margin-bottom: $spacing-sm;
+
+      label {
+        @include flex(row, flex-start, center);
+        gap: $spacing-sm;
+        cursor: pointer;
+
+        input {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  &__threshold {
+    @include flex(row, space-between, center);
+    
+    input {
+      width: 80px;
+      padding: $spacing-xs;
+      border-radius: $border-radius-sm;
+      border: 1px solid rgba($text-color, 0.2);
+      background: $background-color;
+    }
+  }
+} 

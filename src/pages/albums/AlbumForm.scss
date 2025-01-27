@@ -30,6 +30,11 @@
     input, select {
       @include input-field;
 
+      option {
+        background-color: var(--background-color);
+        color: var(--text-color);
+      }
+
       &.error {
         border-color: $error-color;
       }
@@ -122,4 +127,15 @@
     @include button(transparent);
     padding: $spacing-xs;
   }
+}
+
+.error {
+  border-color: #ff4444 !important;
+}
+
+.error-message {
+  color: #ff4444;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+  display: block;
 } 

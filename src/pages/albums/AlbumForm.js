@@ -1,33 +1,78 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 import { FaPlus, FaGripVertical } from 'react-icons/fa';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import ImageUpload from '../../components/ImageUpload/ImageUpload';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../../services/api';
 import './AlbumForm.scss';
 
-const validationSchema = Yup.object({
-  title: Yup.string().required('Le titre est requis'),
-  artist: Yup.string().required('L\'artiste est requis'),
-  releaseDate: Yup.date().required('La date de sortie est requise'),
-  genre: Yup.string().required('Le genre est requis'),
-});
-
 function AlbumForm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const isEditMode = Boolean(id);
+
+  const { data: artists } = useQuery({
+    queryKey: ['artists'],
+    queryFn: () => api.get('/artists'),
+  });
+
+  const { data: album, isLoading } = useQuery({
+    queryKey: ['album', id],
+    queryFn: () => api.get(`/albums/${id}`),
+    enabled: isEditMode,
+  });
+
+  const mutation = useMutation({
+    mutationFn: (values) => {
+      if (isEditMode) {
+        return api.put(`/albums/${id}`, values);
+      }
+      return api.post('/albums', values);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['albums']);
+      navigate('/albums');
+    },
+    onError: (error) => {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert(t('albums.form.error.save'));
+    }
+  });
+
   const [tracks, setTracks] = useState([]);
   const [albumCover, setAlbumCover] = useState(null);
 
+  const validationSchema = Yup.object({
+    title: Yup.string().required(t('albums.form.validation.titleRequired')),
+    artist: Yup.string().required(t('albums.form.validation.artistRequired')),
+    releaseDate: Yup.date()
+      .required(t('albums.form.validation.yearRequired'))
+      .typeError(t('albums.form.validation.yearInvalid')),
+    genre: Yup.string()
+      .required(t('albums.form.validation.genreRequired'))
+      .notOneOf([''], t('albums.form.validation.genreRequired')),
+  });
+
   const formik = useFormik({
     initialValues: {
-      title: '',
-      artist: '',
-      releaseDate: '',
-      genre: '',
-      description: '',
+      title: album?.title || '',
+      artist: album?.artist?._id || '',
+      releaseDate: album?.releaseDate ? new Date(album.releaseDate).toISOString().split('T')[0] : '',
+      genre: album?.genre || '',
+      description: album?.description || '',
+      tracks: album?.tracks || [],
+      albumCover: null
     },
+    enableReinitialize: true,
     validationSchema,
     onSubmit: (values) => {
-      console.log({ ...values, tracks, albumCover });
+      mutation.mutate(values);
     },
   });
 
@@ -51,22 +96,26 @@ function AlbumForm() {
     setTracks(items);
   };
 
+  if (isLoading) {
+    return <div>Chargement...</div>;
+  }
+
   return (
     <div className="album-form">
-      <h2>Nouvel Album</h2>
+      <h2>{isEditMode ? t('albums.form.title.edit') : t('albums.form.title.add')}</h2>
       
       <form onSubmit={formik.handleSubmit}>
         <div className="form-grid">
           <div className="form-group full-width">
             <ImageUpload
-              label="Pochette de l'album"
+              label={t('albums.form.cover')}
               onImageChange={setAlbumCover}
               initialImage={null}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="title">Titre de l'album</label>
+            <label htmlFor="title">{t('albums.form.name')}</label>
             <input
               id="title"
               name="title"
@@ -81,55 +130,68 @@ function AlbumForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="artist">Artiste</label>
-            <input
+            <label htmlFor="artist">{t('albums.form.artist')}</label>
+            <select
               id="artist"
-              name="artist"
-              type="text"
-              value={formik.values.artist}
-              onChange={formik.handleChange}
-              className={formik.errors.artist && formik.touched.artist ? 'error' : ''}
-            />
-            {formik.errors.artist && formik.touched.artist && (
+              {...formik.getFieldProps('artist')}
+              className={formik.touched.artist && formik.errors.artist ? 'error' : ''}
+            >
+              <option value="">Sélectionner un artiste</option>
+              {artists?.map(artist => (
+                <option key={artist._id} value={artist._id}>
+                  {artist.name}
+                </option>
+              ))}
+            </select>
+            {formik.touched.artist && formik.errors.artist && (
               <span className="error-message">{formik.errors.artist}</span>
             )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="releaseDate">Date de sortie</label>
+            <label htmlFor="releaseDate">{t('albums.form.year')}</label>
             <input
               id="releaseDate"
               name="releaseDate"
               type="date"
               value={formik.values.releaseDate}
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               className={formik.errors.releaseDate && formik.touched.releaseDate ? 'error' : ''}
             />
+            {formik.errors.releaseDate && formik.touched.releaseDate && (
+              <span className="error-message">{formik.errors.releaseDate}</span>
+            )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="genre">Genre</label>
+            <label htmlFor="genre">{t('albums.form.genre')}</label>
             <select
               id="genre"
               name="genre"
               value={formik.values.genre}
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={formik.errors.genre && formik.touched.genre ? 'error' : ''}
             >
-              <option value="">Sélectionner un genre</option>
+              <option value="">{t('albums.form.selectGenre')}</option>
               <option value="pop">Pop</option>
               <option value="rock">Rock</option>
               <option value="hip-hop">Hip-Hop</option>
               <option value="jazz">Jazz</option>
               <option value="classique">Classique</option>
             </select>
+            {formik.errors.genre && formik.touched.genre && (
+              <span className="error-message">{formik.errors.genre}</span>
+            )}
           </div>
         </div>
 
         <div className="tracks-section">
           <div className="tracks-header">
-            <h3>Pistes</h3>
+            <h3>{t('albums.form.tracks')}</h3>
             <button type="button" className="btn btn--secondary" onClick={handleTrackAdd}>
-              <FaPlus /> Ajouter une piste
+              <FaPlus /> {t('albums.form.addTrack')}
             </button>
           </div>
 
@@ -152,13 +214,13 @@ function AlbumForm() {
                             type="text"
                             value={track.title}
                             onChange={(e) => handleTrackChange(track.id, 'title', e.target.value)}
-                            placeholder="Titre de la piste"
+                            placeholder={t('albums.form.trackTitle')}
                           />
                           <input
                             type="text"
                             value={track.duration}
                             onChange={(e) => handleTrackChange(track.id, 'duration', e.target.value)}
-                            placeholder="Durée"
+                            placeholder={t('albums.form.trackDuration')}
                           />
                         </div>
                       )}
@@ -172,8 +234,19 @@ function AlbumForm() {
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="btn btn--primary">
-            Enregistrer l'album
+          <button 
+            type="button" 
+            className="btn btn--secondary"
+            onClick={() => navigate('/albums')}
+          >
+            {t('albums.form.cancel')}
+          </button>
+          <button 
+            type="submit" 
+            className="btn btn--primary"
+            disabled={mutation.isLoading}
+          >
+            {t('albums.form.submit')}
           </button>
         </div>
       </form>

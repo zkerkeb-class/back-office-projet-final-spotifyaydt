@@ -1,0 +1,12 @@
+{
+  "testArtist": {
+    "name": "Test Artist",
+    "biography": "This is a test biography",
+    "genres": ["Pop", "Rock"],
+    "socialLinks": {
+      "spotify": "https://spotify.com/artist/test",
+      "instagram": "https://instagram.com/testartist",
+      "twitter": "https://twitter.com/testartist"
+    }
+  }
+} 

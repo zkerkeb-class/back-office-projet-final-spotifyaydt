@@ -1,0 +1,54 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.metrics-card {
+  background: rgba($secondary-color, 0.3);
+  border-radius: $border-radius;
+  padding: $spacing-md;
+  @include flex(row, flex-start, center);
+  gap: $spacing-md;
+  transition: all $transition-duration ease;
+  cursor: move;
+  width: 300px;
+  margin-bottom: $spacing-sm;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $box-shadow-lg;
+  }
+
+  &__icon {
+    font-size: $font-size-lg;
+    opacity: 0.8;
+  }
+
+  &__content {
+    flex: 1;
+  }
+
+  &__title {
+    font-size: $font-size-sm;
+    color: rgba($text-color, 0.8);
+    margin: 0 0 $spacing-xs;
+  }
+
+  &__value {
+    font-size: $font-size-md;
+    font-weight: 600;
+    @include flex(row, flex-start, center);
+    gap: $spacing-sm;
+  }
+
+  &.alert {
+    background-color: rgba($error-color, 0.1);
+    border: 1px solid $error-color;
+
+    .metrics-card__value {
+      color: $error-color;
+    }
+
+    .metrics-card__icon {
+      color: $error-color;
+    }
+  }
+} 
