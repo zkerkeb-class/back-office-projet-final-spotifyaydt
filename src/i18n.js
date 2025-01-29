@@ -188,6 +188,31 @@ i18n
               "title": "Statistics",
               "actionsPerDay": "Actions per day",
               "recentActivity": "Recent activity"
+            },
+            "auditLog": {
+              "title": "Audit Log",
+              "filters": {
+                "all": "All Events",
+                "high": "High Importance",
+                "medium": "Medium Importance",
+                "low": "Low Importance"
+              },
+              "severity": {
+                "high": "High",
+                "medium": "Medium",
+                "low": "Low"
+              },
+              "by": "By",
+              "target": "Target",
+              "actions": {
+                "USER_ROLE_CHANGE": "User Role Change",
+                "USER_DELETE": "User Delete",
+                "PERMISSION_CHANGE": "Permission Change",
+                "USER_CREATE": "User Create",
+                "SYSTEM_CONFIG": "System Configuration",
+                "ALBUM_UPDATE": "Album update",
+                "ALBUM_DELETE": "Album deletion"
+              }
             }
           },
           "common": {
@@ -379,6 +404,31 @@ i18n
               "title": "Statistiques",
               "actionsPerDay": "Actions par jour",
               "recentActivity": "Activité récente"
+            },
+            "auditLog": {
+              "title": "Journal d'audit",
+              "filters": {
+                "all": "Tous les événements",
+                "high": "Haute importance",
+                "medium": "Importance moyenne",
+                "low": "Faible importance"
+              },
+              "severity": {
+                "high": "Haute",
+                "medium": "Moyenne",
+                "low": "Faible"
+              },
+              "by": "Par",
+              "target": "Cible",
+              "actions": {
+                "USER_ROLE_CHANGE": "Changement de rôle",
+                "USER_DELETE": "Suppression d'utilisateur",
+                "PERMISSION_CHANGE": "Modification des permissions",
+                "USER_CREATE": "Création d'utilisateur",
+                "SYSTEM_CONFIG": "Configuration système",
+                "ALBUM_UPDATE": "Modification d'album",
+                "ALBUM_DELETE": "Suppression d'album"
+              }
             }
           },
           "common": {
@@ -570,6 +620,31 @@ i18n
               "title": "الإحصائيات",
               "actionsPerDay": "الإجراءات في اليوم",
               "recentActivity": "النشاط الأخير"
+            },
+            "auditLog": {
+              "title": "دفتر التدقيق",
+              "filters": {
+                "all": "كل الأحداث",
+                "high": "أهمية عالية",
+                "medium": "أهمية متوسطة",
+                "low": "أهمية منخفضة"
+              },
+              "severity": {
+                "high": "عالية",
+                "medium": "متوسطة",
+                "low": "منخفضة"
+              },
+              "by": "بواسطة",
+              "target": "الهدف",
+              "actions": {
+                "USER_ROLE_CHANGE": "تغيير الدور",
+                "USER_DELETE": "حذف المستخدم",
+                "PERMISSION_CHANGE": "تغيير الصلاحيات",
+                "USER_CREATE": "إنشاء المستخدم",
+                "SYSTEM_CONFIG": "تكوين النظام",
+                "ALBUM_UPDATE": "تحديث الألبوم",
+                "ALBUM_DELETE": "حذف الألبوم"
+              }
             }
           },
           "common": {

@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
 import { usePermissions } from '../../components/Layout/Layout';
+import { useAuditLog } from '../../contexts/AuditLogContext';
+import { useAuth } from '../../contexts/AuthContext';
 import './AlbumList.scss';
 
 const SEARCH_HISTORY_KEY = 'albumSearchHistory';
@@ -62,6 +64,8 @@ function AlbumList() {
   });
 
   const { canEdit, canManage } = usePermissions();
+  const { addLog } = useAuditLog();
+  const { user } = useAuth();
 
   // Gestion de l'historique des recherches
   const addToHistory = (term) => {
@@ -151,6 +155,13 @@ function AlbumList() {
     if (window.confirm(t('albums.confirmDelete'))) {
       try {
         await deleteMutation.mutateAsync(albumId);
+        addLog({
+          action: "ALBUM_DELETE",
+          user: user?.email || 'unknown',
+          target: albums.find(a => a._id === albumId)?.title || albumId,
+          details: "Album deleted from the system",
+          severity: "high"
+        });
       } catch (error) {
         console.error('Error deleting album:', error);
       }

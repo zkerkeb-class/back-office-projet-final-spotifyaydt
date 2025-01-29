@@ -9,6 +9,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import './AlbumForm.scss';
+import { useAuditLog } from '../../contexts/AuditLogContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 function AlbumForm() {
   const { id } = useParams();
@@ -16,6 +18,8 @@ function AlbumForm() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(id);
+  const { addLog } = useAuditLog();
+  const { user } = useAuth();
 
   const { data: artists } = useQuery({
     queryKey: ['artists'],
@@ -71,8 +75,24 @@ function AlbumForm() {
     },
     enableReinitialize: true,
     validationSchema,
-    onSubmit: (values) => {
-      mutation.mutate(values);
+    onSubmit: async (values) => {
+      try {
+        if (id) {
+          await mutation.mutateAsync({ id, ...values });
+          addLog({
+            action: "ALBUM_UPDATE",
+            user: user?.email || 'unknown',
+            target: values.title,
+            details: "Updated album information",
+            severity: "medium"
+          });
+        } else {
+          await mutation.mutateAsync(values);
+        }
+        navigate('/albums');
+      } catch (error) {
+        console.error('Error saving album:', error);
+      }
     },
   });
 

@@ -352,4 +352,112 @@
     margin-top: $spacing-lg;
     gap: $spacing-sm;
   }
+}
+
+.audit-log {
+  margin-top: $spacing-xl;
+  padding-top: $spacing-xl;
+  border-top: 1px solid rgba($text-color, 0.1);
+
+  &__header {
+    @include flex(row, space-between, center);
+    margin-bottom: $spacing-lg;
+
+    h3 {
+      @include flex(row, flex-start, center);
+      gap: $spacing-sm;
+      color: $text-color;
+      margin: 0;
+
+      svg {
+        color: $primary-color;
+      }
+    }
+  }
+
+  &__filters {
+    select {
+      padding: $spacing-sm;
+      border-radius: $border-radius;
+      border: 1px solid $border-color;
+      background: $background-color;
+      color: $text-color;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__item {
+    background: rgba($secondary-color, 0.3);
+    border-radius: $border-radius;
+    overflow: hidden;
+
+    &.severity-high {
+      border-left: 4px solid $error-color;
+    }
+
+    &.severity-medium {
+      border-left: 4px solid $warning-color;
+    }
+
+    &.severity-low {
+      border-left: 4px solid $success-color;
+    }
+
+    &-header {
+      @include flex(row, space-between, center);
+      padding: $spacing-sm $spacing-md;
+      background: rgba($secondary-color, 0.2);
+
+      .timestamp {
+        font-size: 0.9rem;
+        color: rgba($text-color, 0.7);
+      }
+
+      .severity {
+        @include flex(row, center, center);
+        gap: $spacing-xs;
+        font-size: 0.8rem;
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $border-radius-sm;
+
+        &-high {
+          background: rgba($error-color, 0.1);
+          color: $error-color;
+        }
+
+        &-medium {
+          background: rgba($warning-color, 0.1);
+          color: $warning-color;
+        }
+
+        &-low {
+          background: rgba($success-color, 0.1);
+          color: $success-color;
+        }
+      }
+    }
+
+    &-content {
+      padding: $spacing-md;
+
+      h4 {
+        margin: 0 0 $spacing-sm;
+        color: $text-color;
+      }
+
+      p {
+        margin: $spacing-xs 0;
+        color: rgba($text-color, 0.8);
+
+        strong {
+          color: $text-color;
+        }
+      }
+    }
+  }
 } 
