@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter, FaSort, FaSortUp, FaSortDown, FaMusic } from 'react-icons/fa';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
@@ -459,6 +459,7 @@ function AlbumList() {
         <table>
           <thead>
             <tr>
+              <th></th>
               <th onClick={() => handleSort('title')} className="sortable">
                 {t('albums.table.title')} {getSortIcon('title')}
               </th>
@@ -474,18 +475,29 @@ function AlbumList() {
               <th onClick={() => handleSort('tracks')} className="sortable">
                 {t('albums.table.tracks')} {getSortIcon('tracks')}
               </th>
-              {(canEdit() || canManage()) && <th>{t('albums.table.actions')}</th>}
+              {canManage() && <th>{t('albums.table.actions')}</th>}
             </tr>
           </thead>
           <tbody>
             {displayedAlbums.map(album => (
               <tr key={album._id}>
+                <td className="image-cell">
+                  <div className="album-cover">
+                    {album.coverImage ? (
+                      <img src={album.coverImage} alt={album.title} />
+                    ) : (
+                      <div className="album-cover-placeholder">
+                        <FaMusic />
+                      </div>
+                    )}
+                  </div>
+                </td>
                 <td>{album.title}</td>
                 <td>{album.artist?.name || t('albums.unknownArtist')}</td>
                 <td>{album.genre}</td>
                 <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
                 <td>{album.tracks?.length || 0}</td>
-                {(canEdit() || canManage()) && (
+                {canManage() && (
                   <td className="actions">
                     {canEdit() && (
                       <Link 
