@@ -8,6 +8,8 @@ import { api } from '../../services/api';
 import { usePermissions } from '../../components/Layout/Layout';
 import { useAuditLog } from '../../contexts/AuditLogContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useOfflineMode } from '../../hooks/useOfflineMode';
+import { toast } from 'react-hot-toast';
 import './AlbumList.scss';
 
 const SEARCH_HISTORY_KEY = 'albumSearchHistory';
@@ -66,6 +68,7 @@ function AlbumList() {
   const { canEdit, canManage } = usePermissions();
   const { addLog } = useAuditLog();
   const { user } = useAuth();
+  const { isOnline } = useOfflineMode();
 
   // Gestion de l'historique des recherches
   const addToHistory = (term) => {
@@ -140,30 +143,41 @@ function AlbumList() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (albumId) => api.delete(`/albums/${albumId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['albums']);
+    mutationFn: (id) => api.deleteAlbum(id),
+    onSuccess: (data) => {
+      // Mise à jour optimiste du cache
+      queryClient.setQueryData(['albums'], (old) => {
+        const albums = old || [];
+        return albums.filter(album => album.id !== data.id);
+      });
+
+      if (!data._isOffline) {
+        queryClient.invalidateQueries({ queryKey: ['albums'] });
+      }
+
+      toast.success(data._isOffline 
+        ? "Album supprimé en mode hors ligne. La suppression sera synchronisée une fois la connexion rétablie"
+        : "Album supprimé avec succès"
+      );
     },
     onError: (error) => {
       console.error('Erreur lors de la suppression:', error);
-      alert(t('albums.deleteError'));
+      toast.error("Erreur lors de la suppression de l'album");
     }
   });
 
-  const handleDelete = async (albumId) => {
-    if (!canManage()) return;
-    if (window.confirm(t('albums.confirmDelete'))) {
+  const handleDelete = async (id) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet album ?')) {
       try {
-        await deleteMutation.mutateAsync(albumId);
-        addLog({
-          action: "ALBUM_DELETE",
-          user: user?.email || 'unknown',
-          target: albums.find(a => a._id === albumId)?.title || albumId,
-          details: "Album deleted from the system",
-          severity: "high"
-        });
+        await deleteMutation.mutateAsync(id);
       } catch (error) {
-        console.error('Error deleting album:', error);
+        if (!isOnline) {
+          // En mode hors ligne, on continue malgré l'erreur
+          queryClient.setQueryData(['albums'], (old) => {
+            return old.filter(album => album.id !== id);
+          });
+          toast.success("Album supprimé en mode hors ligne");
+        }
       }
     }
   };
