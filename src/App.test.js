@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -27,6 +27,15 @@ i18n.use(initReactI18next).init({
       translations: {
         'nav': {
           'admin': 'Administration'
+        },
+        'login': {
+          'title': 'Connexion',
+          'email': 'Email',
+          'password': 'Mot de passe',
+          'submit': 'Se connecter',
+          'help': {
+            'title': 'Comptes de test'
+          }
         }
       }
     }
@@ -50,7 +59,7 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-test('renders login page when not authenticated', () => {
+test('renders login page when not authenticated', async () => {
   render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -61,8 +70,13 @@ test('renders login page when not authenticated', () => {
     </QueryClientProvider>
   );
 
+  // Attendre que le composant de chargement disparaisse
+  await waitFor(() => {
+    expect(screen.queryByText('Chargement...')).not.toBeInTheDocument();
+  });
+
   // Vérifie que la page de login est affichée
-  const loginTitle = screen.getByText(/Connexion/i);
+  const loginTitle = await screen.findByText(/Connexion/i);
   expect(loginTitle).toBeInTheDocument();
 
   // Vérifie que les champs de connexion sont présents
