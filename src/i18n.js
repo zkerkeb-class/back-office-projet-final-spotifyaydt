@@ -220,6 +220,20 @@ i18n
           "common": {
             "accessDenied": "Accès Refusé",
             "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
+          },
+          "tracks": {
+            "add": "Ajouter une piste",
+            "form": {
+              "title": {
+                "add": "Ajouter une nouvelle piste"
+              },
+              "audioFile": "Fichier audio",
+              "validation": {
+                "fileRequired": "Le fichier audio est requis"
+              },
+              "success": "Piste ajoutée avec succès",
+              "error": "Erreur lors de l'ajout de la piste"
+            }
           }
         }
       },
@@ -438,6 +452,20 @@ i18n
           "common": {
             "accessDenied": "Accès Refusé",
             "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
+          },
+          "tracks": {
+            "add": "Ajouter une piste",
+            "form": {
+              "title": {
+                "add": "Ajouter une nouvelle piste"
+              },
+              "audioFile": "Fichier audio",
+              "validation": {
+                "fileRequired": "Le fichier audio est requis"
+              },
+              "success": "Piste ajoutée avec succès",
+              "error": "Erreur lors de l'ajout de la piste"
+            }
           }
         }
       },
@@ -656,6 +684,20 @@ i18n
           "common": {
             "accessDenied": "إصرار الوصول",
             "noPermission": "لا تمتلك الصلاحيات اللازمة للوصول إلى هذه الصفحة"
+          },
+          "tracks": {
+            "add": "إضافة مقطع",
+            "form": {
+              "title": {
+                "add": "إضافة مقطع جديد"
+              },
+              "audioFile": "ملف الصوت",
+              "validation": {
+                "fileRequired": "ملف الصوت مطلوب"
+              },
+              "success": "تم إضافة المقطع بنجاح",
+              "error": "حدث خطأ أثناء إضافة المقطع"
+            }
           }
         }
       }

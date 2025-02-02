@@ -7,6 +7,7 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import './styles/global.scss';
+import TrackList from './pages/tracks/TrackList';
 
 const queryClient = new QueryClient();
 

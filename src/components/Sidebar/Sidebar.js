@@ -73,6 +73,12 @@ function Sidebar() {
               </Link>
             </li>
           )}
+          <li className={isActive('/tracks')}>
+            <Link to="/tracks">
+              <FaMusic aria-hidden="true" />
+              <span>{t('nav.tracks')}</span>
+            </Link>
+          </li>
         </ul>
 
         <div className="sidebar__controls">
