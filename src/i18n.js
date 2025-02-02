@@ -13,7 +13,8 @@ i18n
             "artists": "Artists",
             "albums": "Albums",
             "main": "Main navigation",
-            "roles": "Roles"
+            "roles": "Roles",
+            "tracks": "Tracks"
           },
           "theme": {
             "light": "Light mode",
@@ -222,7 +223,16 @@ i18n
             "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
           },
           "tracks": {
-            "add": "Ajouter une piste",
+            "title": "Tracks Management",
+            "add": "Add Track",
+            "table": {
+              "title": "Title",
+              "artist": "Artist",
+              "album": "Album",
+              "duration": "Duration",
+              "listens": "Listens",
+              "actions": "Actions"
+            },
             "form": {
               "title": {
                 "add": "Ajouter une nouvelle piste"
@@ -245,7 +255,8 @@ i18n
             "artists": "Artistes",
             "albums": "Albums",
             "main": "Navigation principale",
-            "roles": "Rôles"
+            "roles": "Rôles",
+            "tracks": "Pistes"
           },
           "theme": {
             "light": "Mode clair",
@@ -255,7 +266,7 @@ i18n
             "select": "Changer de langue",
             "fr": "Français",
             "en": "Anglais",
-            "ar": "Arabeee"
+            "ar": "Arabe"
           },
           "offline": {
             "message": "Vous êtes hors ligne"
@@ -454,7 +465,16 @@ i18n
             "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
           },
           "tracks": {
+            "title": "Gestion des pistes",
             "add": "Ajouter une piste",
+            "table": {
+              "title": "Titre",
+              "artist": "Artiste",
+              "album": "Album",
+              "duration": "Durée",
+              "listens": "Écoutes",
+              "actions": "Actions"
+            },
             "form": {
               "title": {
                 "add": "Ajouter une nouvelle piste"
@@ -477,7 +497,8 @@ i18n
             "artists": "الفنانون",
             "albums": "الألبومات",
             "main": "التنقل الرئيسي",
-            "roles": "الأدوار"
+            "roles": "الأدوار",
+            "tracks": "المقاطع"
           },
           "theme": {
             "light": "الوضع الفاتح",
@@ -550,10 +571,10 @@ i18n
             "table": {
               "title": "العنوان",
               "artist": "الفنان",
-              "year": "سنة الإصدار",
+              "genre": "النوع الموسيقي",
+              "releaseDate": "تاريخ الإصدار",
               "tracks": "المقطوعات",
-              "actions": "الإجراءات",
-              "genre": "النوع الموسيقي"
+              "actions": "الإجراءات"
             },
             "form": {
               "title": {
@@ -686,7 +707,16 @@ i18n
             "noPermission": "لا تمتلك الصلاحيات اللازمة للوصول إلى هذه الصفحة"
           },
           "tracks": {
+            "title": "إدارة المقاطع",
             "add": "إضافة مقطع",
+            "table": {
+              "title": "العنوان",
+              "artist": "الفنان",
+              "album": "الألبوم",
+              "duration": "المدة",
+              "listens": "الاستماع",
+              "actions": "الإجراءات"
+            },
             "form": {
               "title": {
                 "add": "إضافة مقطع جديد"

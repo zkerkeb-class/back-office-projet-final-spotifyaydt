@@ -3,6 +3,8 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
 import './Layout.scss';
+import { FaMusic } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 // Déplacer le hook usePermissions avant le composant Layout
 export const usePermissions = () => {
@@ -16,6 +18,8 @@ export const usePermissions = () => {
 };
 
 function Layout() {
+  const { t } = useTranslation();
+
   return (
     <div className="layout">
       <Sidebar />
