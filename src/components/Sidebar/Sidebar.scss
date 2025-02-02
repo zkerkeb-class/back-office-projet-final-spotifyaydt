@@ -1,0 +1,160 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.sidebar {
+  width: 250px;
+  background-color: $sidebar-background;
+  padding: $spacing-lg;
+  box-shadow: $box-shadow;
+  position: relative;
+  min-height: 100vh;
+
+  &__logo {
+    margin-bottom: $spacing-xl;
+    padding-bottom: $spacing-lg;
+    border-bottom: 1px solid rgba($text-color, 0.1);
+
+    h1 {
+      color: $primary-color;
+      font-size: $font-size-xl;
+      margin: 0;
+      text-align: center;
+    }
+  }
+
+  &__menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: $spacing-sm;
+      border-radius: $border-radius;
+      transition: all $transition-duration ease;
+
+      &.active {
+        background-color: rgba($primary-color, 0.1);
+        
+        a {
+          color: $primary-color;
+        }
+      }
+
+      &:hover {
+        background-color: rgba($primary-color, 0.05);
+      }
+
+      a {
+        @include flex(row, flex-start, center);
+        padding: $spacing-md;
+        color: $text-color;
+        text-decoration: none;
+        gap: $spacing-md;
+        transition: all $transition-duration ease;
+
+        svg {
+          font-size: $font-size-lg;
+          opacity: 0.8;
+        }
+
+        span {
+          font-size: $font-size-md;
+        }
+
+        &:hover {
+          color: $primary-color;
+        }
+      }
+    }
+  }
+
+  &__controls {
+    position: absolute;
+    bottom: $spacing-xl;
+    left: 0;
+    right: 0;
+    padding: 0 $spacing-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    align-items: center;
+
+    .language-selector {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      color: $text-color;
+
+      svg {
+        font-size: $font-size-lg;
+      }
+
+      select {
+        background: none;
+        border: 1px solid $border-color;
+        color: $text-color;
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $border-radius-sm;
+        cursor: pointer;
+        font-size: $font-size-sm;
+
+        &:hover {
+          border-color: $primary-color;
+        }
+
+        option {
+          background-color: $background-color;
+          color: $text-color;
+        }
+      }
+    }
+  }
+}
+
+.user-info {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid $border-color;
+  
+  .user-email {
+    display: block;
+    font-size: 0.9rem;
+    color: $text-color;
+    margin-bottom: 0.25rem;
+  }
+  
+  .user-role {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: $primary-color;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  background: none;
+  border: 1px solid $border-color;
+  color: $text-color;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: $error-color;
+    color: white;
+    border-color: $error-color;
+  }
+
+  svg {
+    margin-right: 0.5rem;
+  }
+} 

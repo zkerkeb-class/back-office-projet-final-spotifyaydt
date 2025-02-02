@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
@@ -11,41 +11,96 @@ import { api } from '../../services/api';
 import './AlbumForm.scss';
 import { useAuditLog } from '../../contexts/AuditLogContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useOfflineMode } from '../../hooks/useOfflineMode';
+import { toast } from 'react-hot-toast';
 
 function AlbumForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { isOnline } = useOfflineMode();
   const isEditMode = Boolean(id);
   const { addLog } = useAuditLog();
   const { user } = useAuth();
 
-  const { data: artists } = useQuery({
-    queryKey: ['artists'],
-    queryFn: () => api.get('/artists'),
+  const { data: albums } = useQuery({
+    queryKey: ['albums'],
+    queryFn: () => api.get('/albums')
   });
 
-  const { data: album, isLoading } = useQuery({
+  const uniqueArtists = useMemo(() => {
+    if (!albums) return [];
+    
+    const artistMap = new Map();
+    albums.forEach(album => {
+      if (album.artist && album.artist._id) {
+        artistMap.set(album.artist._id, album.artist);
+      }
+    });
+    
+    return Array.from(artistMap.values());
+  }, [albums]);
+
+  const { data: album, isLoading: isLoadingAlbum } = useQuery({
     queryKey: ['album', id],
-    queryFn: () => api.get(`/albums/${id}`),
+    queryFn: () => api.getAlbum(id),
     enabled: isEditMode,
+    onSuccess: (data) => {
+      formik.setValues({
+        title: data.title || '',
+        artist: data.artist?._id || '',
+        releaseDate: data.releaseDate ? new Date(data.releaseDate).toISOString().split('T')[0] : '',
+        genre: data.genre || '',
+        description: data.description || `Description de l'album ${data.title}`,
+        coverImage: data.coverImage || '',
+        tracks: data.tracks || []
+      });
+    }
   });
 
   const mutation = useMutation({
-    mutationFn: (values) => {
+    mutationFn: async (data) => {
       if (isEditMode) {
-        return api.put(`/albums/${id}`, values);
+        return await api.updateAlbum(id, data);
+      } else {
+        return await api.createAlbum(data);
       }
-      return api.post('/albums', values);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['albums']);
-      navigate('/albums');
+    onSuccess: (data) => {
+      queryClient.setQueryData(['albums'], (old) => {
+        const albums = old || [];
+        if (data._isOffline) {
+          if (isEditMode) {
+            return albums.map(a => a.id === data.id ? data : a);
+          }
+          return [...albums, data];
+        }
+        return albums;
+      });
+
+      if (!data._isOffline) {
+        queryClient.invalidateQueries({ queryKey: ['albums'] });
+      }
+
+      toast.success(data._isOffline 
+        ? `Album ${isEditMode ? 'modifié' : 'créé'} en mode hors ligne. Il sera synchronisé une fois la connexion rétablie`
+        : `Album ${isEditMode ? 'modifié' : 'créé'} avec succès`
+      );
+
+      if (!data._isOffline && user) {
+        addLog({
+          action: isEditMode ? "ALBUM_UPDATE" : "ALBUM_CREATE",
+          user: user.email,
+          target: data.title,
+          details: `${isEditMode ? 'Updated' : 'Created'} album information`,
+          severity: "medium"
+        });
+      }
     },
     onError: (error) => {
-      console.error('Erreur lors de la sauvegarde:', error);
-      alert(t('albums.form.error.save'));
+      console.error('Erreur mutation:', error);
+      toast.error(`Erreur lors de la ${isEditMode ? 'modification' : 'création'} de l'album`);
     }
   });
 
@@ -69,31 +124,29 @@ function AlbumForm() {
       artist: album?.artist?._id || '',
       releaseDate: album?.releaseDate ? new Date(album.releaseDate).toISOString().split('T')[0] : '',
       genre: album?.genre || '',
-      description: album?.description || '',
-      tracks: album?.tracks || [],
-      albumCover: null
+      description: "Cet album est une collection de morceaux uniques qui reflètent l'évolution artistique et musicale de l'artiste.",
+      coverImage: album?.coverImage || '',
+      tracks: album?.tracks || []
     },
     enableReinitialize: true,
     validationSchema,
     onSubmit: async (values) => {
       try {
-        if (id) {
-          await mutation.mutateAsync({ id, ...values });
-          addLog({
-            action: "ALBUM_UPDATE",
-            user: user?.email || 'unknown',
-            target: values.title,
-            details: "Updated album information",
-            severity: "medium"
-          });
+        const formattedValues = {
+          ...values,
+          tracks: values.tracks.map(track => track._id)
+        };
+
+        if (!isOnline) {
+          mutation.mutate(formattedValues);
         } else {
-          await mutation.mutateAsync(values);
+          await mutation.mutateAsync(formattedValues);
         }
         navigate('/albums');
       } catch (error) {
-        console.error('Error saving album:', error);
+        console.error('Erreur soumission:', error);
       }
-    },
+    }
   });
 
   const handleTrackAdd = () => {
@@ -116,7 +169,18 @@ function AlbumForm() {
     setTracks(items);
   };
 
-  if (isLoading) {
+  const handleImageChange = (event) => {
+    const file = event.currentTarget.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        formik.setFieldValue('coverImage', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  if (isLoadingAlbum) {
     return <div>Chargement...</div>;
   }
 
@@ -157,7 +221,7 @@ function AlbumForm() {
               className={formik.touched.artist && formik.errors.artist ? 'error' : ''}
             >
               <option value="">Sélectionner un artiste</option>
-              {artists?.map(artist => (
+              {uniqueArtists.map(artist => (
                 <option key={artist._id} value={artist._id}>
                   {artist.name}
                 </option>
@@ -203,6 +267,37 @@ function AlbumForm() {
             </select>
             {formik.errors.genre && formik.touched.genre && (
               <span className="error-message">{formik.errors.genre}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="description">{t('albums.form.description')}</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              required
+              rows="4"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="coverImage">{t('albums.form.coverImage')}</label>
+            <input
+              type="text"
+              id="coverImage"
+              name="coverImage"
+              value={formik.values.coverImage}
+              onChange={formik.handleChange}
+              placeholder="URL de l'image de couverture"
+            />
+            {formik.values.coverImage && (
+              <img 
+                src={formik.values.coverImage} 
+                alt="Preview" 
+                style={{ maxWidth: '200px', marginTop: '10px' }} 
+              />
             )}
           </div>
         </div>

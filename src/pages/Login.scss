@@ -1,3 +1,6 @@
+@import '../styles/variables';
+@import '../styles/mixins';
+
 .login-page {
   display: flex;
   justify-content: center;
@@ -10,17 +13,18 @@
     width: 100%;
     max-width: 400px;
     padding: 2rem;
-    background: var(--surface-color);
+    background: rgba($secondary-color, 0.3);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $box-shadow;
 
     h2 {
       margin-bottom: 1.5rem;
       text-align: center;
+      color: $text-color;
     }
 
     .error-message {
-      color: var(--error-color);
+      color: $error-color;
       margin-bottom: 1rem;
       text-align: center;
     }
@@ -31,26 +35,52 @@
       label {
         display: block;
         margin-bottom: 0.5rem;
+        color: $text-color;
       }
 
       input {
         width: 100%;
         padding: 0.5rem;
-        border: 1px solid var(--border-color);
+        border: 1px solid $border-color;
         border-radius: 4px;
+        background: $background-color;
+        color: $text-color;
+
+        &:focus {
+          border-color: $primary-color;
+          outline: none;
+        }
       }
     }
 
     button {
       width: 100%;
       margin-top: 1rem;
+      padding: $spacing-sm $spacing-md;
+      background: $primary-color;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        opacity: 0.9;
+        filter: brightness(0.9);
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
     }
 
     .login-help {
       margin-top: 2rem;
       padding-top: 1rem;
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid $border-color;
       font-size: 0.9rem;
+      color: rgba($text-color, 0.8);
 
       p {
         margin-bottom: 0.5rem;
@@ -62,7 +92,7 @@
 
         li {
           margin-bottom: 0.25rem;
-          color: var(--text-muted);
+          color: rgba($text-color, 0.7);
         }
       }
     }

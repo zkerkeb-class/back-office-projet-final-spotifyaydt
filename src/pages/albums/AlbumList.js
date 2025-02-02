@@ -8,6 +8,8 @@ import { api } from '../../services/api';
 import { usePermissions } from '../../components/Layout/Layout';
 import { useAuditLog } from '../../contexts/AuditLogContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useOfflineMode } from '../../hooks/useOfflineMode';
+import { toast } from 'react-hot-toast';
 import './AlbumList.scss';
 
 const SEARCH_HISTORY_KEY = 'albumSearchHistory';
@@ -66,6 +68,7 @@ function AlbumList() {
   const { canEdit, canManage } = usePermissions();
   const { addLog } = useAuditLog();
   const { user } = useAuth();
+  const { isOnline } = useOfflineMode();
 
   // Gestion de l'historique des recherches
   const addToHistory = (term) => {
@@ -140,30 +143,47 @@ function AlbumList() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (albumId) => api.delete(`/albums/${albumId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['albums']);
+    mutationFn: (id) => api.deleteAlbum(id),
+    onSuccess: (data) => {
+      // Mise à jour optimiste du cache
+      queryClient.setQueryData(['albums'], (old) => {
+        const albums = old || [];
+        return albums.filter(album => album.id !== data.id);
+      });
+
+      if (!data._isOffline) {
+        queryClient.invalidateQueries({ queryKey: ['albums'] });
+      }
+
+      toast.success(data._isOffline 
+        ? "Album supprimé en mode hors ligne. La suppression sera synchronisée une fois la connexion rétablie"
+        : "Album supprimé avec succès"
+      );
     },
     onError: (error) => {
       console.error('Erreur lors de la suppression:', error);
-      alert(t('albums.deleteError'));
+      toast.error("Erreur lors de la suppression de l'album");
     }
   });
 
-  const handleDelete = async (albumId) => {
-    if (!canManage()) return;
+  const handleDelete = async (album) => {
     if (window.confirm(t('albums.confirmDelete'))) {
       try {
-        await deleteMutation.mutateAsync(albumId);
+        await api.delete(`/albums/${album._id}`);
+        
+        // Ajouter l'entrée dans le journal d'audit
         addLog({
-          action: "ALBUM_DELETE",
-          user: user?.email || 'unknown',
-          target: albums.find(a => a._id === albumId)?.title || albumId,
-          details: "Album deleted from the system",
-          severity: "high"
+          action: 'ALBUM_DELETE',
+          user: user?.email || 'Système',
+          target: `Album: ${album.title}`,
+          details: `Suppression de l'album ${album.title}`,
+          severity: 'high'
         });
+
+        // Rafraîchir la liste des albums
+        queryClient.invalidateQueries(['albums']);
       } catch (error) {
-        console.error('Error deleting album:', error);
+        toast.error(error.message);
       }
     }
   };
@@ -486,7 +506,7 @@ function AlbumList() {
               <th onClick={() => handleSort('tracks')} className="sortable">
                 {t('albums.table.tracks')} {getSortIcon('tracks')}
               </th>
-              {canManage() && <th>{t('albums.table.actions')}</th>}
+              {(canManage() || canEdit()) && <th>{t('albums.table.actions')}</th>}
             </tr>
           </thead>
           <tbody>
@@ -508,13 +528,13 @@ function AlbumList() {
                 <td>{album.genre}</td>
                 <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
                 <td>{album.tracks?.length || 0}</td>
-                {canManage() && (
+                {(canManage() || canEdit()) && (
                   <td className="actions">
                     {canEdit() && (
                       <Link 
                         to={`/albums/edit/${album._id}`}
                         className="btn btn--icon"
-                        aria-label={t('albums.form.title.edit')}
+                        aria-label={t('albums.edit')}
                       >
                         <FaEdit />
                       </Link>
@@ -522,7 +542,7 @@ function AlbumList() {
                     {canManage() && (
                       <button 
                         className="btn btn--icon btn--danger"
-                        onClick={() => handleDelete(album._id)}
+                        onClick={() => handleDelete(album)}
                         aria-label={t('albums.delete')}
                         disabled={deleteMutation.isLoading}
                       >
