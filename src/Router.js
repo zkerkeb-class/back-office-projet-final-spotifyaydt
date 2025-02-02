@@ -13,6 +13,8 @@ import AlbumList from './pages/albums/AlbumList';
 const Dashboard = React.lazy(() => import('./pages/dashboard/Dashboard'));
 const RoleList = React.lazy(() => import('./pages/roles/RoleList'));
 const Login = lazy(() => import('./pages/Login'));
+const TrackList = React.lazy(() => import('./pages/tracks/TrackList'));
+const TrackForm = React.lazy(() => import('./pages/tracks/TrackForm'));
 
 // Composant de chargement
 const LoadingFallback = () => (
@@ -80,6 +82,16 @@ function Router() {
         <Route path="roles" element={
           <Suspense fallback={<LoadingFallback />}>
             <RoleList />
+          </Suspense>
+        } />
+        <Route path="tracks" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <TrackList />
+          </Suspense>
+        } />
+        <Route path="tracks/new" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <TrackForm />
           </Suspense>
         } />
       </Route>

@@ -1,5 +1,6 @@
 import { openDB } from 'idb';
 import { mockUsers } from '../mocks/auth';
+import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 const DB_NAME = 'spotifyOfflineDB';
@@ -166,23 +167,33 @@ class Api {
     }
   }
 
-  async post(endpoint, data) {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...defaultOptions,
-        method: 'POST',
-        body: JSON.stringify(data)
+  async post(endpoint, data, config = {}) {
+    if (data instanceof FormData) {
+      // Utiliser axios directement pour les requêtes FormData
+      const response = await axios.post(`${API_BASE_URL}${endpoint}`, data, {
+        ...config,
+        headers: {
+          ...config.headers,
+        }
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('API Error:', error);
-      throw error;
+      return response.data;
     }
+
+    // Utiliser la méthode existante pour les autres requêtes
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.getHeaders(),
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    return response.json();
   }
 
   async put(endpoint, data) {
@@ -440,4 +451,11 @@ class Api {
   }
 }
 
-export const api = new Api(); 
+export const api = new Api();
+
+export const axiosInstance = axios.create({
+  baseURL: 'http://localhost:3001/api',
+  // Ne pas définir de Content-Type par défaut
+});
+
+// Pour les requêtes multipart/form-data, axios définira automatiquement le bon Content-Type 
