@@ -6,6 +6,17 @@ const DB_NAME = 'spotifyOfflineDB';
 const DB_VERSION = 1;
 const PENDING_STORE = 'pendingOperations';
 
+// Configuration de base pour les requêtes fetch
+const defaultHeaders = {
+  'Accept': 'application/json',
+  'Content-Type': 'application/json'
+};
+
+const defaultOptions = {
+  headers: defaultHeaders,
+  credentials: 'include'  // Important pour CORS
+};
+
 // Amélioration de la configuration IndexedDB
 const initDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
@@ -84,166 +95,134 @@ const getStoreNameFromEndpoint = (endpoint) => {
   }
 };
 
-export const api = {
-  async get(endpoint) {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      });
-      
+// Fonction pour obtenir les données
+const getData = async (endpoint) => {
+  try {
+    // Toujours essayer d'abord de récupérer depuis le serveur si en ligne
+    if (navigator.onLine) {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Erreur lors de la récupération');
       }
-      
       const data = await response.json();
-      console.log(`Données reçues pour ${endpoint}:`, data);
       
-      // Stocker dans le bon store IndexedDB
+      // Mettre à jour IndexedDB avec les nouvelles données
+      const db = await initDB();
       const storeName = getStoreNameFromEndpoint(endpoint);
-      const db = await openDB(DB_NAME);
-      const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-      
-      if (Array.isArray(data)) {
-        for (const item of data) {
-          await store.put(ensureId(item));
-        }
-      } else {
-        await store.put(ensureId(data));
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      await store.clear(); // Nettoyer les anciennes données
+      for (const item of data) {
+        await store.put(item);
       }
       
       return data;
-    } catch (error) {
-      console.error('API Error:', error);
-      
-      // En cas d'erreur, essayer de récupérer depuis le bon store IndexedDB
-      try {
-        const storeName = getStoreNameFromEndpoint(endpoint);
-        const db = await openDB(DB_NAME);
-        const store = db.transaction(storeName, 'readonly').objectStore(storeName);
-        const data = await store.getAll();
-        console.log(`Données récupérées depuis IndexedDB (${storeName}):`, data);
-        return data;
-      } catch (dbError) {
-        console.error('IndexedDB Error:', dbError);
-        throw error;
-      }
+    } else {
+      // Si hors ligne, utiliser IndexedDB
+      const db = await initDB();
+      const storeName = getStoreNameFromEndpoint(endpoint);
+      return await db.getAll(storeName);
     }
-  },
+  } catch (error) {
+    console.error('Erreur lors de la récupération:', error);
+    throw error;
+  }
+};
 
-  async post(endpoint, data) {
+class Api {
+  constructor() {
+    this.lastRequestTime = 0;
+    this.minRequestInterval = 1000; // 1 seconde minimum entre les requêtes
+  }
+
+  async throttleRequest() {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    
+    if (timeSinceLastRequest < this.minRequestInterval) {
+      await new Promise(resolve => 
+        setTimeout(resolve, this.minRequestInterval - timeSinceLastRequest)
+      );
+    }
+    
+    this.lastRequestTime = Date.now();
+  }
+
+  async get(endpoint) {
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+        ...defaultOptions,
+        method: 'GET'
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const responseData = await response.json();
-      
-      // Stocker dans le bon store IndexedDB
-      const storeName = getStoreNameFromEndpoint(endpoint);
-      const db = await openDB(DB_NAME);
-      const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-      await store.put(ensureId(responseData));
-      
-      return responseData;
-    } catch (error) {
-      console.error('API Error:', error);
-      
-      // En cas d'erreur, stocker temporairement dans le bon store IndexedDB
-      try {
-        const storeName = getStoreNameFromEndpoint(endpoint);
-        const db = await openDB(DB_NAME);
-        const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-        const tempData = ensureId(data);
-        await store.put(tempData);
-        return tempData;
-      } catch (dbError) {
-        console.error('IndexedDB Error:', dbError);
-        throw error;
-      }
-    }
-  },
-
-  async put(endpoint, data) {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'PUT',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-      
-      // Stocker dans le bon store IndexedDB
-      const storeName = getStoreNameFromEndpoint(endpoint);
-      const db = await openDB(DB_NAME);
-      const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-      await store.put(ensureId(responseData));
-      
-      return responseData;
-    } catch (error) {
-      console.error('API Error:', error);
-      
-      // En cas d'erreur, stocker temporairement dans le bon store IndexedDB
-      try {
-        const storeName = getStoreNameFromEndpoint(endpoint);
-        const db = await openDB(DB_NAME);
-        const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-        const tempData = ensureId({ ...data, id: endpoint.split('/').pop() });
-        await store.put(tempData);
-        return tempData;
-      } catch (dbError) {
-        console.error('IndexedDB Error:', dbError);
-        throw error;
-      }
-    }
-  },
-
-  async delete(endpoint) {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'DELETE',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Supprimer de IndexedDB
-      const storeName = getStoreNameFromEndpoint(endpoint);
-      const db = await openDB(DB_NAME);
-      const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-      await store.delete(endpoint.split('/').pop());
-      
       return await response.json();
     } catch (error) {
       console.error('API Error:', error);
       throw error;
     }
-  },
+  }
 
+  async post(endpoint, data) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...defaultOptions,
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  async put(endpoint, data) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...defaultOptions,
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  async delete(endpoint) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...defaultOptions,
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  // Méthodes spécifiques
   async login(credentials) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -259,54 +238,48 @@ export const api = {
             token
           });
         } else {
-          reject(new Error('Invalid credentials'));
+          reject(new Error('Email ou mot de passe incorrect'));
         }
       }, 500);
     });
-  },
+  }
 
-  async createArtist(artistData) {
-    if (!navigator.onLine) {
-      // En mode hors ligne, on crée directement dans IndexedDB
-      const tempId = `temp_${Date.now()}`;
-      const offlineArtist = {
-        ...artistData,
-        id: tempId,
-        _isOffline: true
-      };
-      
-      try {
-        const db = await initDB();
-        await db.add('artists', offlineArtist);
+  async getArtists() {
+    return this.get('/artists');
+  }
 
-        await savePendingOperation({
-          endpoint: '/artists',
-          method: 'POST',
-          data: artistData
-        });
+  async getArtist(id) {
+    return this.get(`/artists/${id}`);
+  }
 
-        return offlineArtist; // Retourner l'artiste créé hors ligne
-      } catch (error) {
-        console.error('Erreur lors de la sauvegarde hors ligne:', error);
-        throw error;
-      }
-    }
+  async createArtist(data) {
+    return this.post('/artists', data);
+  }
 
-    // En mode en ligne, on fait la requête normale
+  async updateArtist(id, data) {
+    return this.put(`/artists/${id}`, data);
+  }
+
+  async deleteArtist(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/artists`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(artistData)
+      await this.throttleRequest(); // Attendre si nécessaire
+
+      const response = await fetch(`${API_BASE_URL}/artists/${id}`, {
+        ...defaultOptions,
+        method: 'DELETE'
       });
-      return await response.json();
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erreur lors de la suppression (${response.status})`);
+      }
+
+      return { success: true, id };
     } catch (error) {
-      console.error('Erreur lors de la création de l\'artiste:', error);
+      console.error('Erreur lors de la suppression de l\'artiste:', error);
       throw error;
     }
-  },
+  }
 
   async createAlbum(albumData) {
     if (!navigator.onLine) {
@@ -349,7 +322,7 @@ export const api = {
       console.error('Erreur lors de la création de l\'album:', error);
       throw error;
     }
-  },
+  }
 
   async updateAlbum(id, albumData) {
     if (!navigator.onLine) {
@@ -392,7 +365,7 @@ export const api = {
       console.error('Erreur lors de la mise à jour de l\'album:', error);
       throw error;
     }
-  },
+  }
 
   async getAlbum(id) {
     if (!navigator.onLine) {
@@ -412,7 +385,7 @@ export const api = {
       console.error('Erreur lors de la récupération de l\'album:', error);
       throw error;
     }
-  },
+  }
 
   async deleteAlbum(id) {
     if (!navigator.onLine) {
@@ -457,89 +430,14 @@ export const api = {
       console.error('Erreur lors de la suppression de l\'album:', error);
       throw error;
     }
-  },
+  }
 
   // Méthode pour vérifier et synchroniser les données
   async syncOfflineData() {
     if (navigator.onLine) {
       await syncPendingOperations();
     }
-  },
+  }
+}
 
-  async getArtist(id) {
-    if (!navigator.onLine) {
-      try {
-        const db = await initDB();
-        return await db.get('artists', id);
-      } catch (error) {
-        console.error('Erreur lors de la récupération hors ligne:', error);
-        throw error;
-      }
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/artists/${id}`);
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération');
-      }
-      const data = await response.json();
-      return {
-        ...data,
-        biography: data.description // Conversion description -> biography
-      };
-    } catch (error) {
-      console.error('Erreur lors de la récupération de l\'artiste:', error);
-      throw error;
-    }
-  },
-
-  async updateArtist(id, artistData) {
-    // Conversion biography -> description pour l'API
-    const apiData = {
-      ...artistData,
-      description: artistData.biography
-    };
-    delete apiData.biography;
-
-    if (!navigator.onLine) {
-      try {
-        const db = await initDB();
-        const offlineArtist = {
-          ...artistData,
-          id,
-          _isOffline: true
-        };
-
-        await db.put('artists', offlineArtist);
-        await savePendingOperation({
-          endpoint: `/artists/${id}`,
-          method: 'PUT',
-          data: apiData
-        });
-
-        return offlineArtist;
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour hors ligne:', error);
-        throw error;
-      }
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/artists/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiData)
-      });
-      const data = await response.json();
-      return {
-        ...data,
-        biography: data.description
-      };
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour de l\'artiste:', error);
-      throw error;
-    }
-  },
-}; 
+export const api = new Api(); 

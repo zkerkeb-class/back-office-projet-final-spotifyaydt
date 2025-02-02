@@ -115,7 +115,9 @@ i18n
                 "genreRequired": "Genre is required",
                 "yearRequired": "Release year is required",
                 "yearInvalid": "Please enter a valid year"
-              }
+              },
+              "description": "Description",
+              "coverImage": "Cover Image"
             },
             "confirmDelete": "Are you sure you want to delete this album?"
           },
@@ -331,7 +333,9 @@ i18n
                 "genreRequired": "Le genre est requis",
                 "yearRequired": "L'année de sortie est requise",
                 "yearInvalid": "Veuillez entrer une année valide"
-              }
+              },
+              "description": "Description",
+              "coverImage": "Image de couverture"
             },
             "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet album ?"
           },
@@ -547,7 +551,9 @@ i18n
                 "genreRequired": "النوع مطلوب",
                 "yearRequired": "سنة الإصدار مطلوبة",
                 "yearInvalid": "الرجاء إدخال سنة صحيحة"
-              }
+              },
+              "description": "الوصف",
+              "coverImage": "صورة الغلاف"
             },
             "confirmDelete": "هل أنت متأكد من حذف هذا الألبوم؟"
           },

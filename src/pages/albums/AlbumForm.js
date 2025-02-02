@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
@@ -24,15 +24,39 @@ function AlbumForm() {
   const { addLog } = useAuditLog();
   const { user } = useAuth();
 
-  const { data: artists } = useQuery({
-    queryKey: ['artists'],
-    queryFn: () => api.get('/artists'),
+  const { data: albums } = useQuery({
+    queryKey: ['albums'],
+    queryFn: () => api.get('/albums')
   });
+
+  const uniqueArtists = useMemo(() => {
+    if (!albums) return [];
+    
+    const artistMap = new Map();
+    albums.forEach(album => {
+      if (album.artist && album.artist._id) {
+        artistMap.set(album.artist._id, album.artist);
+      }
+    });
+    
+    return Array.from(artistMap.values());
+  }, [albums]);
 
   const { data: album, isLoading: isLoadingAlbum } = useQuery({
     queryKey: ['album', id],
     queryFn: () => api.getAlbum(id),
     enabled: isEditMode,
+    onSuccess: (data) => {
+      formik.setValues({
+        title: data.title || '',
+        artist: data.artist?._id || '',
+        releaseDate: data.releaseDate ? new Date(data.releaseDate).toISOString().split('T')[0] : '',
+        genre: data.genre || '',
+        description: data.description || `Description de l'album ${data.title}`,
+        coverImage: data.coverImage || '',
+        tracks: data.tracks || []
+      });
+    }
   });
 
   const mutation = useMutation({
@@ -100,29 +124,29 @@ function AlbumForm() {
       artist: album?.artist?._id || '',
       releaseDate: album?.releaseDate ? new Date(album.releaseDate).toISOString().split('T')[0] : '',
       genre: album?.genre || '',
-      description: album?.description || '',
-      tracks: album?.tracks || [],
-      albumCover: null
+      description: "Cet album est une collection de morceaux uniques qui reflètent l'évolution artistique et musicale de l'artiste.",
+      coverImage: album?.coverImage || '',
+      tracks: album?.tracks || []
     },
     enableReinitialize: true,
     validationSchema,
     onSubmit: async (values) => {
-      if (!isOnline) {
-        try {
-          mutation.mutate(values);
-          navigate('/albums');
-        } catch (error) {
-          console.error('Erreur soumission hors ligne:', error);
+      try {
+        const formattedValues = {
+          ...values,
+          tracks: values.tracks.map(track => track._id)
+        };
+
+        if (!isOnline) {
+          mutation.mutate(formattedValues);
+        } else {
+          await mutation.mutateAsync(formattedValues);
         }
-      } else {
-        try {
-          await mutation.mutateAsync(values);
-          navigate('/albums');
-        } catch (error) {
-          console.error('Erreur soumission:', error);
-        }
+        navigate('/albums');
+      } catch (error) {
+        console.error('Erreur soumission:', error);
       }
-    },
+    }
   });
 
   const handleTrackAdd = () => {
@@ -143,6 +167,17 @@ function AlbumForm() {
     items.splice(result.destination.index, 0, reorderedItem);
 
     setTracks(items);
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.currentTarget.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        formik.setFieldValue('coverImage', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   if (isLoadingAlbum) {
@@ -186,7 +221,7 @@ function AlbumForm() {
               className={formik.touched.artist && formik.errors.artist ? 'error' : ''}
             >
               <option value="">Sélectionner un artiste</option>
-              {artists?.map(artist => (
+              {uniqueArtists.map(artist => (
                 <option key={artist._id} value={artist._id}>
                   {artist.name}
                 </option>
@@ -232,6 +267,37 @@ function AlbumForm() {
             </select>
             {formik.errors.genre && formik.touched.genre && (
               <span className="error-message">{formik.errors.genre}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="description">{t('albums.form.description')}</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              required
+              rows="4"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="coverImage">{t('albums.form.coverImage')}</label>
+            <input
+              type="text"
+              id="coverImage"
+              name="coverImage"
+              value={formik.values.coverImage}
+              onChange={formik.handleChange}
+              placeholder="URL de l'image de couverture"
+            />
+            {formik.values.coverImage && (
+              <img 
+                src={formik.values.coverImage} 
+                alt="Preview" 
+                style={{ maxWidth: '200px', marginTop: '10px' }} 
+              />
             )}
           </div>
         </div>

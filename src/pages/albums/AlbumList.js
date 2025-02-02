@@ -166,18 +166,24 @@ function AlbumList() {
     }
   });
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet album ?')) {
+  const handleDelete = async (album) => {
+    if (window.confirm(t('albums.confirmDelete'))) {
       try {
-        await deleteMutation.mutateAsync(id);
+        await api.delete(`/albums/${album._id}`);
+        
+        // Ajouter l'entrée dans le journal d'audit
+        addLog({
+          action: 'ALBUM_DELETE',
+          user: user?.email || 'Système',
+          target: `Album: ${album.title}`,
+          details: `Suppression de l'album ${album.title}`,
+          severity: 'high'
+        });
+
+        // Rafraîchir la liste des albums
+        queryClient.invalidateQueries(['albums']);
       } catch (error) {
-        if (!isOnline) {
-          // En mode hors ligne, on continue malgré l'erreur
-          queryClient.setQueryData(['albums'], (old) => {
-            return old.filter(album => album.id !== id);
-          });
-          toast.success("Album supprimé en mode hors ligne");
-        }
+        toast.error(error.message);
       }
     }
   };
@@ -500,7 +506,7 @@ function AlbumList() {
               <th onClick={() => handleSort('tracks')} className="sortable">
                 {t('albums.table.tracks')} {getSortIcon('tracks')}
               </th>
-              {canManage() && <th>{t('albums.table.actions')}</th>}
+              {(canManage() || canEdit()) && <th>{t('albums.table.actions')}</th>}
             </tr>
           </thead>
           <tbody>
@@ -522,13 +528,13 @@ function AlbumList() {
                 <td>{album.genre}</td>
                 <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
                 <td>{album.tracks?.length || 0}</td>
-                {canManage() && (
+                {(canManage() || canEdit()) && (
                   <td className="actions">
                     {canEdit() && (
                       <Link 
                         to={`/albums/edit/${album._id}`}
                         className="btn btn--icon"
-                        aria-label={t('albums.form.title.edit')}
+                        aria-label={t('albums.edit')}
                       >
                         <FaEdit />
                       </Link>
@@ -536,7 +542,7 @@ function AlbumList() {
                     {canManage() && (
                       <button 
                         className="btn btn--icon btn--danger"
-                        onClick={() => handleDelete(album._id)}
+                        onClick={() => handleDelete(album)}
                         aria-label={t('albums.delete')}
                         disabled={deleteMutation.isLoading}
                       >
