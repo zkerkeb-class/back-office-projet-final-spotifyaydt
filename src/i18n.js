@@ -124,7 +124,8 @@ i18n
           },
           "common": {
             "save": "Save",
-            "cancel": "Cancel"
+            "cancel": "Cancel",
+            "loading": "Loading..."
           },
           "search": {
             "recentSearches": "Recent searches",
@@ -216,11 +217,14 @@ i18n
                 "ALBUM_UPDATE": "Album update",
                 "ALBUM_DELETE": "Album deletion"
               }
-            }
-          },
-          "common": {
-            "accessDenied": "Accès Refusé",
-            "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
+            },
+            "search": {
+              "placeholder": "Search for a role..."
+            },
+            "toggle": {
+              "stats": "Show/Hide statistics"
+            },
+            "toggleStats": "Statistics"
           },
           "tracks": {
             "title": "Tracks Management",
@@ -235,14 +239,14 @@ i18n
             },
             "form": {
               "title": {
-                "add": "Ajouter une nouvelle piste"
+                "add": "Add New Track"
               },
-              "audioFile": "Fichier audio",
+              "audioFile": "Audio File",
               "validation": {
-                "fileRequired": "Le fichier audio est requis"
+                "fileRequired": "Audio file is required"
               },
-              "success": "Piste ajoutée avec succès",
-              "error": "Erreur lors de l'ajout de la piste"
+              "success": "Track added successfully",
+              "error": "Error adding track"
             }
           }
         }
@@ -366,7 +370,8 @@ i18n
           },
           "common": {
             "save": "Enregistrer",
-            "cancel": "Annuler"
+            "cancel": "Annuler",
+            "loading": "Chargement..."
           },
           "search": {
             "recentSearches": "Recherches récentes",
@@ -458,11 +463,14 @@ i18n
                 "ALBUM_UPDATE": "Modification d'album",
                 "ALBUM_DELETE": "Suppression d'album"
               }
-            }
-          },
-          "common": {
-            "accessDenied": "Accès Refusé",
-            "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
+            },
+            "search": {
+              "placeholder": "Rechercher un rôle..."
+            },
+            "toggle": {
+              "stats": "Afficher/Masquer les statistiques"
+            },
+            "toggleStats": "Statistiques"
           },
           "tracks": {
             "title": "Gestion des pistes",
@@ -608,7 +616,8 @@ i18n
           },
           "common": {
             "save": "حفظ",
-            "cancel": "إلغاء"
+            "cancel": "إلغاء",
+            "loading": "جار التحميل..."
           },
           "search": {
             "recentSearches": "عمليات البحث الأخيرة",
@@ -700,11 +709,14 @@ i18n
                 "ALBUM_UPDATE": "تحديث الألبوم",
                 "ALBUM_DELETE": "حذف الألبوم"
               }
-            }
-          },
-          "common": {
-            "accessDenied": "إصرار الوصول",
-            "noPermission": "لا تمتلك الصلاحيات اللازمة للوصول إلى هذه الصفحة"
+            },
+            "search": {
+              "placeholder": "البحث عن دور..."
+            },
+            "toggle": {
+              "stats": "إظهار/إخفاء الإحصائيات"
+            },
+            "toggleStats": "الإحصائيات"
           },
           "tracks": {
             "title": "إدارة المقاطع",
