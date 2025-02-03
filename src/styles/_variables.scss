@@ -20,7 +20,7 @@
   --sidebar-background: #282828;
 }
 
-// Remplacer les valeurs fixes par des variables CSS
+// Variables SCSS
 $primary-color: var(--primary-color);
 $secondary-color: var(--secondary-color);
 $background-color: var(--background-color);
@@ -63,8 +63,8 @@ $font-size-lg: 18px;
 $font-size-xl: 24px;
 
 // Ombres
-$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-$box-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.3);
+$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
 
 $error-color: #ff4444;
 $warning-color: #ffbb33;

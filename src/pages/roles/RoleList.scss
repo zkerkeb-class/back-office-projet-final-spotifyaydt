@@ -17,7 +17,7 @@
 
       .search-box {
         @include flex(row, flex-start, center);
-        background: rgba($secondary-color, 0.1);
+        background: $sidebar-background;
         padding: $spacing-sm;
         border-radius: $border-radius;
         gap: $spacing-sm;
@@ -38,6 +38,15 @@
           }
         }
       }
+
+      .btn--secondary {
+        @include flex(row, center, center);
+        gap: $spacing-sm;
+        
+        svg {
+          margin-right: $spacing-xs;
+        }
+      }
     }
   }
 
@@ -46,18 +55,46 @@
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: $spacing-lg;
   }
+
+  &__table {
+    background: $sidebar-background;
+    border-radius: $border-radius;
+    overflow: hidden;
+    box-shadow: $box-shadow;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      th, td {
+        padding: $spacing-md;
+        border-bottom: 1px solid rgba($text-color, 0.1);
+      }
+
+      th {
+        text-align: left;
+        font-weight: 600;
+        color: $text-color;
+      }
+
+      td {
+        color: rgba($text-color, 0.8);
+      }
+    }
+  }
 }
 
 .role-card {
-  background: rgba($secondary-color, 0.3);
+  background: $sidebar-background;
   border-radius: $border-radius;
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
+  box-shadow: $box-shadow;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: $box-shadow;
+    box-shadow: $box-shadow-lg;
   }
 
   &.selected {
@@ -113,8 +150,7 @@
           @include flex(row, flex-start, center);
           gap: $spacing-xs;
 
-          &::before {
-            content: "•";
+          svg {
             color: $primary-color;
           }
         }
@@ -351,5 +387,77 @@
     @include flex(row, flex-end, center);
     margin-top: $spacing-lg;
     gap: $spacing-sm;
+  }
+}
+
+.audit-log {
+  margin-top: $spacing-xl;
+  background: $sidebar-background;
+  border-radius: $border-radius;
+  padding: $spacing-lg;
+  box-shadow: $box-shadow;
+
+  &__header {
+    @include flex(row, space-between, center);
+    margin-bottom: $spacing-lg;
+
+    h3 {
+      @include flex(row, flex-start, center);
+      gap: $spacing-sm;
+      margin: 0;
+      color: $text-color;
+
+      svg {
+        color: $primary-color;
+      }
+    }
+  }
+
+  &__filters {
+    select {
+      padding: $spacing-xs $spacing-sm;
+      border: 1px solid rgba($text-color, 0.2);
+      border-radius: $border-radius-sm;
+      background: $background-color;
+      color: $text-color;
+    }
+  }
+
+  &__list {
+    .log-item {
+      background: rgba($secondary-color, 0.1);
+      border-radius: $border-radius-sm;
+      padding: $spacing-sm;
+      margin-bottom: $spacing-sm;
+
+      &-header {
+        @include flex(row, space-between, center);
+        margin-bottom: $spacing-xs;
+        font-size: $font-size-sm;
+        color: rgba($text-color, 0.7);
+      }
+
+      &-severity {
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $border-radius-sm;
+        font-size: $font-size-xs;
+        font-weight: 500;
+
+        &-high {
+          background: rgba($error-color, 0.1);
+          color: $error-color;
+        }
+
+        &-medium {
+          background: rgba($warning-color, 0.1);
+          color: $warning-color;
+        }
+
+        &-low {
+          background: rgba($success-color, 0.1);
+          color: $success-color;
+        }
+      }
+    }
   }
 } 

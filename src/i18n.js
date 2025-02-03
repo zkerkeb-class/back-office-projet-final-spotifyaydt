@@ -13,7 +13,8 @@ i18n
             "artists": "Artists",
             "albums": "Albums",
             "main": "Main navigation",
-            "roles": "Roles"
+            "roles": "Roles",
+            "tracks": "Tracks"
           },
           "theme": {
             "light": "Light mode",
@@ -115,13 +116,16 @@ i18n
                 "genreRequired": "Genre is required",
                 "yearRequired": "Release year is required",
                 "yearInvalid": "Please enter a valid year"
-              }
+              },
+              "description": "Description",
+              "coverImage": "Cover Image"
             },
             "confirmDelete": "Are you sure you want to delete this album?"
           },
           "common": {
             "save": "Save",
-            "cancel": "Cancel"
+            "cancel": "Cancel",
+            "loading": "Loading..."
           },
           "search": {
             "recentSearches": "Recent searches",
@@ -188,11 +192,62 @@ i18n
               "title": "Statistics",
               "actionsPerDay": "Actions per day",
               "recentActivity": "Recent activity"
-            }
+            },
+            "auditLog": {
+              "title": "Audit Log",
+              "filters": {
+                "all": "All Events",
+                "high": "High Importance",
+                "medium": "Medium Importance",
+                "low": "Low Importance"
+              },
+              "severity": {
+                "high": "High",
+                "medium": "Medium",
+                "low": "Low"
+              },
+              "by": "By",
+              "target": "Target",
+              "actions": {
+                "USER_ROLE_CHANGE": "User Role Change",
+                "USER_DELETE": "User Delete",
+                "PERMISSION_CHANGE": "Permission Change",
+                "USER_CREATE": "User Create",
+                "SYSTEM_CONFIG": "System Configuration",
+                "ALBUM_UPDATE": "Album update",
+                "ALBUM_DELETE": "Album deletion"
+              }
+            },
+            "search": {
+              "placeholder": "Search for a role..."
+            },
+            "toggle": {
+              "stats": "Show/Hide statistics"
+            },
+            "toggleStats": "Statistics"
           },
-          "common": {
-            "accessDenied": "Accès Refusé",
-            "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
+          "tracks": {
+            "title": "Tracks Management",
+            "add": "Add Track",
+            "table": {
+              "title": "Title",
+              "artist": "Artist",
+              "album": "Album",
+              "duration": "Duration",
+              "listens": "Listens",
+              "actions": "Actions"
+            },
+            "form": {
+              "title": {
+                "add": "Add New Track"
+              },
+              "audioFile": "Audio File",
+              "validation": {
+                "fileRequired": "Audio file is required"
+              },
+              "success": "Track added successfully",
+              "error": "Error adding track"
+            }
           }
         }
       },
@@ -204,7 +259,8 @@ i18n
             "artists": "Artistes",
             "albums": "Albums",
             "main": "Navigation principale",
-            "roles": "Rôles"
+            "roles": "Rôles",
+            "tracks": "Pistes"
           },
           "theme": {
             "light": "Mode clair",
@@ -214,7 +270,7 @@ i18n
             "select": "Changer de langue",
             "fr": "Français",
             "en": "Anglais",
-            "ar": "Arabeee"
+            "ar": "Arabe"
           },
           "offline": {
             "message": "Vous êtes hors ligne"
@@ -306,13 +362,16 @@ i18n
                 "genreRequired": "Le genre est requis",
                 "yearRequired": "L'année de sortie est requise",
                 "yearInvalid": "Veuillez entrer une année valide"
-              }
+              },
+              "description": "Description",
+              "coverImage": "Image de couverture"
             },
             "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet album ?"
           },
           "common": {
             "save": "Enregistrer",
-            "cancel": "Annuler"
+            "cancel": "Annuler",
+            "loading": "Chargement..."
           },
           "search": {
             "recentSearches": "Recherches récentes",
@@ -379,11 +438,62 @@ i18n
               "title": "Statistiques",
               "actionsPerDay": "Actions par jour",
               "recentActivity": "Activité récente"
-            }
+            },
+            "auditLog": {
+              "title": "Journal d'audit",
+              "filters": {
+                "all": "Tous les événements",
+                "high": "Haute importance",
+                "medium": "Importance moyenne",
+                "low": "Faible importance"
+              },
+              "severity": {
+                "high": "Haute",
+                "medium": "Moyenne",
+                "low": "Faible"
+              },
+              "by": "Par",
+              "target": "Cible",
+              "actions": {
+                "USER_ROLE_CHANGE": "Changement de rôle",
+                "USER_DELETE": "Suppression d'utilisateur",
+                "PERMISSION_CHANGE": "Modification des permissions",
+                "USER_CREATE": "Création d'utilisateur",
+                "SYSTEM_CONFIG": "Configuration système",
+                "ALBUM_UPDATE": "Modification d'album",
+                "ALBUM_DELETE": "Suppression d'album"
+              }
+            },
+            "search": {
+              "placeholder": "Rechercher un rôle..."
+            },
+            "toggle": {
+              "stats": "Afficher/Masquer les statistiques"
+            },
+            "toggleStats": "Statistiques"
           },
-          "common": {
-            "accessDenied": "Accès Refusé",
-            "noPermission": "Vous n'avez pas les permissions nécessaires pour accéder à cette page"
+          "tracks": {
+            "title": "Gestion des pistes",
+            "add": "Ajouter une piste",
+            "table": {
+              "title": "Titre",
+              "artist": "Artiste",
+              "album": "Album",
+              "duration": "Durée",
+              "listens": "Écoutes",
+              "actions": "Actions"
+            },
+            "form": {
+              "title": {
+                "add": "Ajouter une nouvelle piste"
+              },
+              "audioFile": "Fichier audio",
+              "validation": {
+                "fileRequired": "Le fichier audio est requis"
+              },
+              "success": "Piste ajoutée avec succès",
+              "error": "Erreur lors de l'ajout de la piste"
+            }
           }
         }
       },
@@ -395,7 +505,8 @@ i18n
             "artists": "الفنانون",
             "albums": "الألبومات",
             "main": "التنقل الرئيسي",
-            "roles": "الأدوار"
+            "roles": "الأدوار",
+            "tracks": "المقاطع"
           },
           "theme": {
             "light": "الوضع الفاتح",
@@ -468,10 +579,10 @@ i18n
             "table": {
               "title": "العنوان",
               "artist": "الفنان",
-              "year": "سنة الإصدار",
+              "genre": "النوع الموسيقي",
+              "releaseDate": "تاريخ الإصدار",
               "tracks": "المقطوعات",
-              "actions": "الإجراءات",
-              "genre": "النوع الموسيقي"
+              "actions": "الإجراءات"
             },
             "form": {
               "title": {
@@ -497,13 +608,16 @@ i18n
                 "genreRequired": "النوع مطلوب",
                 "yearRequired": "سنة الإصدار مطلوبة",
                 "yearInvalid": "الرجاء إدخال سنة صحيحة"
-              }
+              },
+              "description": "الوصف",
+              "coverImage": "صورة الغلاف"
             },
             "confirmDelete": "هل أنت متأكد من حذف هذا الألبوم؟"
           },
           "common": {
             "save": "حفظ",
-            "cancel": "إلغاء"
+            "cancel": "إلغاء",
+            "loading": "جار التحميل..."
           },
           "search": {
             "recentSearches": "عمليات البحث الأخيرة",
@@ -570,11 +684,62 @@ i18n
               "title": "الإحصائيات",
               "actionsPerDay": "الإجراءات في اليوم",
               "recentActivity": "النشاط الأخير"
-            }
+            },
+            "auditLog": {
+              "title": "دفتر التدقيق",
+              "filters": {
+                "all": "كل الأحداث",
+                "high": "أهمية عالية",
+                "medium": "أهمية متوسطة",
+                "low": "أهمية منخفضة"
+              },
+              "severity": {
+                "high": "عالية",
+                "medium": "متوسطة",
+                "low": "منخفضة"
+              },
+              "by": "بواسطة",
+              "target": "الهدف",
+              "actions": {
+                "USER_ROLE_CHANGE": "تغيير الدور",
+                "USER_DELETE": "حذف المستخدم",
+                "PERMISSION_CHANGE": "تغيير الصلاحيات",
+                "USER_CREATE": "إنشاء المستخدم",
+                "SYSTEM_CONFIG": "تكوين النظام",
+                "ALBUM_UPDATE": "تحديث الألبوم",
+                "ALBUM_DELETE": "حذف الألبوم"
+              }
+            },
+            "search": {
+              "placeholder": "البحث عن دور..."
+            },
+            "toggle": {
+              "stats": "إظهار/إخفاء الإحصائيات"
+            },
+            "toggleStats": "الإحصائيات"
           },
-          "common": {
-            "accessDenied": "إصرار الوصول",
-            "noPermission": "لا تمتلك الصلاحيات اللازمة للوصول إلى هذه الصفحة"
+          "tracks": {
+            "title": "إدارة المقاطع",
+            "add": "إضافة مقطع",
+            "table": {
+              "title": "العنوان",
+              "artist": "الفنان",
+              "album": "الألبوم",
+              "duration": "المدة",
+              "listens": "الاستماع",
+              "actions": "الإجراءات"
+            },
+            "form": {
+              "title": {
+                "add": "إضافة مقطع جديد"
+              },
+              "audioFile": "ملف الصوت",
+              "validation": {
+                "fileRequired": "ملف الصوت مطلوب"
+              },
+              "success": "تم إضافة المقطع بنجاح",
+              "error": "حدث خطأ أثناء إضافة المقطع"
+            }
           }
         }
       }

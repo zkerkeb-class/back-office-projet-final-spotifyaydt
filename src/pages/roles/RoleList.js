@@ -1,9 +1,69 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaUserShield, FaUsers, FaChartLine, FaMusic, FaSearch, FaInfoCircle, FaUserEdit } from 'react-icons/fa';
+import { FaUserShield, FaUsers, FaChartLine, FaMusic, FaSearch, FaInfoCircle, FaUserEdit, FaHistory, FaExclamationTriangle } from 'react-icons/fa';
 import { usePermissions } from '../../components/Layout/Layout';
 import { mockUsers } from '../../mocks/auth';
 import './RoleList.scss';
+import { useAuditLog } from '../../contexts/AuditLogContext';
+
+// Composant pour l'audit log
+const AuditLog = () => {
+  const { t } = useTranslation();
+  const [filter, setFilter] = useState('all');
+  const { auditLogs } = useAuditLog();
+
+  const filteredLogs = filter === 'all' 
+    ? auditLogs 
+    : auditLogs.filter(log => log.severity === filter);
+
+  return (
+    <div className="audit-log">
+      <div className="audit-log__header">
+        <h3>
+          <FaHistory />
+          {t('roles.auditLog.title')}
+        </h3>
+        <div className="audit-log__filters">
+          <select 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <option value="all">{t('roles.auditLog.filters.all')}</option>
+            <option value="high">{t('roles.auditLog.filters.high')}</option>
+            <option value="medium">{t('roles.auditLog.filters.medium')}</option>
+            <option value="low">{t('roles.auditLog.filters.low')}</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="audit-log__list">
+        {filteredLogs.map(log => (
+          <div key={log.id} className={`audit-log__item severity-${log.severity}`}>
+            <div className="audit-log__item-header">
+              <span className="timestamp">
+                {new Date(log.timestamp).toLocaleString()}
+              </span>
+              <span className={`severity severity-${log.severity}`}>
+                <FaExclamationTriangle />
+                {t(`roles.auditLog.severity.${log.severity}`)}
+              </span>
+            </div>
+            <div className="audit-log__item-content">
+              <h4>{t(`roles.auditLog.actions.${log.action}`)}</h4>
+              <p className="user">
+                <strong>{t('roles.auditLog.by')}:</strong> {log.user}
+              </p>
+              <p className="target">
+                <strong>{t('roles.auditLog.target')}:</strong> {log.target}
+              </p>
+              <p className="details">{log.details}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 function RoleList() {
   const { t, i18n } = useTranslation();
@@ -165,7 +225,7 @@ function RoleList() {
             <FaSearch />
             <input
               type="text"
-              placeholder={t('roles.search')}
+              placeholder={t('roles.search.placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -173,8 +233,9 @@ function RoleList() {
           <button
             className="btn btn--secondary"
             onClick={() => setShowStats(!showStats)}
+            title={t('roles.toggle.stats')}
           >
-            <FaChartLine />
+            <FaChartLine />{' '}
             <span>{t('roles.toggleStats')}</span>
           </button>
         </div>
@@ -270,6 +331,9 @@ function RoleList() {
           }}
         />
       )}
+
+      {/* Ajouter l'audit log après la section des utilisateurs */}
+      {canManage() && <AuditLog />}
     </div>
   );
 }

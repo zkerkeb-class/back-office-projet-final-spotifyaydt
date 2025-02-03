@@ -5,18 +5,17 @@
   align-items: $align;
 }
 
-@mixin button($bg-color: $primary-color, $text-color: white) {
-  background-color: $bg-color;
-  color: $text-color;
+@mixin button($bg: $primary-color, $color: white) {
+  padding: $spacing-sm $spacing-md;
+  background-color: $bg;
+  color: $color;
   border: none;
-  border-radius: 20px;
-  padding: $spacing-sm $spacing-lg;
+  border-radius: $border-radius;
   cursor: pointer;
-  font-weight: 600;
-  transition: opacity 0.2s;
+  transition: all $transition-duration ease;
 
   &:hover {
-    opacity: 0.8;
+    opacity: 0.9;
   }
 
   &:disabled {
@@ -29,12 +28,17 @@
   width: 100%;
   padding: $spacing-sm;
   border: 1px solid $border-color;
-  border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: $border-radius;
+  background-color: $background-color;
   color: $text-color;
+  transition: all $transition-duration ease;
 
   &:focus {
     outline: none;
     border-color: $primary-color;
+  }
+
+  &::placeholder {
+    color: rgba($text-color, 0.5);
   }
 } 

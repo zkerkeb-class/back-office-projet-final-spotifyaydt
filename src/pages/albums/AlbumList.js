@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaHistory, FaSearch, FaFilter, FaSort, FaSortUp, FaSortDown, FaMusic } from 'react-icons/fa';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
 import { usePermissions } from '../../components/Layout/Layout';
+import { useAuditLog } from '../../contexts/AuditLogContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useOfflineMode } from '../../hooks/useOfflineMode';
+import { toast } from 'react-hot-toast';
 import './AlbumList.scss';
 
 const SEARCH_HISTORY_KEY = 'albumSearchHistory';
@@ -62,6 +66,9 @@ function AlbumList() {
   });
 
   const { canEdit, canManage } = usePermissions();
+  const { addLog } = useAuditLog();
+  const { user } = useAuth();
+  const { isOnline } = useOfflineMode();
 
   // Gestion de l'historique des recherches
   const addToHistory = (term) => {
@@ -136,23 +143,47 @@ function AlbumList() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (albumId) => api.delete(`/albums/${albumId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['albums']);
+    mutationFn: (id) => api.deleteAlbum(id),
+    onSuccess: (data) => {
+      // Mise à jour optimiste du cache
+      queryClient.setQueryData(['albums'], (old) => {
+        const albums = old || [];
+        return albums.filter(album => album.id !== data.id);
+      });
+
+      if (!data._isOffline) {
+        queryClient.invalidateQueries({ queryKey: ['albums'] });
+      }
+
+      toast.success(data._isOffline 
+        ? "Album supprimé en mode hors ligne. La suppression sera synchronisée une fois la connexion rétablie"
+        : "Album supprimé avec succès"
+      );
     },
     onError: (error) => {
       console.error('Erreur lors de la suppression:', error);
-      alert(t('albums.deleteError'));
+      toast.error("Erreur lors de la suppression de l'album");
     }
   });
 
-  const handleDelete = async (albumId) => {
-    if (!canManage()) return;
+  const handleDelete = async (album) => {
     if (window.confirm(t('albums.confirmDelete'))) {
       try {
-        await deleteMutation.mutateAsync(albumId);
+        await api.delete(`/albums/${album._id}`);
+        
+        // Ajouter l'entrée dans le journal d'audit
+        addLog({
+          action: 'ALBUM_DELETE',
+          user: user?.email || 'Système',
+          target: `Album: ${album.title}`,
+          details: `Suppression de l'album ${album.title}`,
+          severity: 'high'
+        });
+
+        // Rafraîchir la liste des albums
+        queryClient.invalidateQueries(['albums']);
       } catch (error) {
-        console.error('Error deleting album:', error);
+        toast.error(error.message);
       }
     }
   };
@@ -459,6 +490,7 @@ function AlbumList() {
         <table>
           <thead>
             <tr>
+              <th></th>
               <th onClick={() => handleSort('title')} className="sortable">
                 {t('albums.table.title')} {getSortIcon('title')}
               </th>
@@ -474,24 +506,35 @@ function AlbumList() {
               <th onClick={() => handleSort('tracks')} className="sortable">
                 {t('albums.table.tracks')} {getSortIcon('tracks')}
               </th>
-              {(canEdit() || canManage()) && <th>{t('albums.table.actions')}</th>}
+              {(canManage() || canEdit()) && <th>{t('albums.table.actions')}</th>}
             </tr>
           </thead>
           <tbody>
             {displayedAlbums.map(album => (
               <tr key={album._id}>
+                <td className="image-cell">
+                  <div className="album-cover">
+                    {album.coverImage ? (
+                      <img src={album.coverImage} alt={album.title} />
+                    ) : (
+                      <div className="album-cover-placeholder">
+                        <FaMusic />
+                      </div>
+                    )}
+                  </div>
+                </td>
                 <td>{album.title}</td>
                 <td>{album.artist?.name || t('albums.unknownArtist')}</td>
                 <td>{album.genre}</td>
                 <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
                 <td>{album.tracks?.length || 0}</td>
-                {(canEdit() || canManage()) && (
+                {(canManage() || canEdit()) && (
                   <td className="actions">
                     {canEdit() && (
                       <Link 
                         to={`/albums/edit/${album._id}`}
                         className="btn btn--icon"
-                        aria-label={t('albums.form.title.edit')}
+                        aria-label={t('albums.edit')}
                       >
                         <FaEdit />
                       </Link>
@@ -499,7 +542,7 @@ function AlbumList() {
                     {canManage() && (
                       <button 
                         className="btn btn--icon btn--danger"
-                        onClick={() => handleDelete(album._id)}
+                        onClick={() => handleDelete(album)}
                         aria-label={t('albums.delete')}
                         disabled={deleteMutation.isLoading}
                       >

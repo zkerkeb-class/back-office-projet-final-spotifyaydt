@@ -19,13 +19,15 @@
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.5.1",
     "react-i18next": "^13.5.0",
     "react-icons": "^5.4.0",
     "react-image-crop": "^10.1.8",
     "react-router-dom": "^6.28.0",
     "react-scripts": "5.0.1",
     "sass": "^1.82.0",
-    "yup": "^1.5.0"
+    "yup": "^1.5.0",
+    "workbox-webpack-plugin": "^6.5.4"
   },
   "devDependencies": {
     "@testing-library/cypress": "^10.0.2",
@@ -34,12 +36,14 @@
     "@testing-library/user-event": "^13.5.0",
     "cypress": "^13.16.1",
     "husky": "^8.0.3",
-    "start-server-and-test": "^2.0.3"
+    "start-server-and-test": "^2.0.3",
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.2.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --watchAll=false --passWithNoTests",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test --passWithNoTests --watchAll=false",
     "eject": "react-scripts eject",
     "prepare": "husky install",
     "cypress:open": "cypress open",

@@ -2,36 +2,37 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
+export function ThemeProvider({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     try {
-      // Récupérer la préférence sauvegardée ou utiliser la préférence système
-      const saved = localStorage.getItem('darkMode');
-      if (saved !== null) {
-        return JSON.parse(saved);
+      // Vérifier si window est défini (pour les tests)
+      if (typeof window === 'undefined') return false;
+      
+      // Vérifier si matchMedia est disponible
+      if (!window.matchMedia) return false;
+
+      const stored = localStorage.getItem('darkMode');
+      if (stored !== null) {
+        return JSON.parse(stored);
       }
       
-      // Vérifier si window.matchMedia est disponible (pour les tests)
-      if (typeof window !== 'undefined' && window.matchMedia) {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
-      }
-      
-      // Valeur par défaut si rien n'est disponible
-      return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
     } catch (error) {
-      console.warn('Error reading theme preference:', error);
+      // En cas d'erreur, retourner une valeur par défaut
       return false;
     }
   });
 
   useEffect(() => {
     try {
-      // Sauvegarder la préférence
       localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-      // Appliquer la classe au body
-      document.body.classList.toggle('dark-mode', isDarkMode);
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark-mode');
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+      }
     } catch (error) {
-      console.warn('Error saving theme preference:', error);
+      console.error('Error setting theme:', error);
     }
   }, [isDarkMode]);
 
@@ -44,12 +45,12 @@ export const ThemeProvider = ({ children }) => {
       {children}
     </ThemeContext.Provider>
   );
-};
+}
 
-export const useTheme = () => {
+export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
-}; 
+} 

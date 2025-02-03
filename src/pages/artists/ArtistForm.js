@@ -5,6 +5,8 @@ import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import { useOfflineMode } from '../../hooks/useOfflineMode';
+import { toast } from 'react-hot-toast';
 import './ArtistForm.scss';
 
 function ArtistForm() {
@@ -12,74 +14,109 @@ function ArtistForm() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { isOnline } = useOfflineMode();
   const isEditMode = Boolean(id);
 
-  const { data: artist, isLoading } = useQuery({
+  const { data: artist, isLoading: isLoadingArtist } = useQuery({
     queryKey: ['artist', id],
-    queryFn: () => api.get(`/artists/${id}`),
+    queryFn: () => api.getArtist(id),
     enabled: isEditMode,
   });
 
   const mutation = useMutation({
-    mutationFn: async (values) => {
-      // Convertir biography en description pour l'API
-      const apiData = {
-        ...values,
-        description: values.biography // Conversion du champ
-      };
-      delete apiData.biography; // Supprimer le champ biography
-
+    mutationFn: async (data) => {
       if (isEditMode) {
-        return api.put(`/artists/${id}`, apiData);
+        return await api.updateArtist(id, data);
       } else {
-        return api.post('/artists', apiData);
+        return await api.createArtist(data);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['artists']);
+    onSuccess: (data) => {
+      queryClient.setQueryData(['artists'], (old) => {
+        const artists = old || [];
+        if (data._isOffline) {
+          if (isEditMode) {
+            return artists.map(a => a.id === data.id ? data : a);
+          }
+          return [...artists, data];
+        }
+        return artists;
+      });
+
+      if (!data._isOffline) {
+        queryClient.invalidateQueries({ queryKey: ['artists'] });
+      }
+
+      toast.success(
+        data._isOffline 
+          ? `Artiste ${isEditMode ? 'modifié' : 'créé'} en mode hors ligne. Il sera synchronisé une fois la connexion rétablie`
+          : `Artiste ${isEditMode ? 'modifié' : 'créé'} avec succès`
+      );
+
       navigate('/artists');
     },
+    onError: (error) => {
+      console.error('Erreur mutation:', error);
+      toast.error(`Erreur lors de la ${isEditMode ? 'modification' : 'création'} de l'artiste`);
+    }
   });
+
+  const handleSubmit = async (values) => {
+    if (!isOnline) {
+      try {
+        mutation.mutate(values);
+        navigate('/artists');
+      } catch (error) {
+        console.error('Erreur soumission hors ligne:', error);
+      }
+    } else {
+      try {
+        await mutation.mutateAsync(values);
+        navigate('/artists');
+      } catch (error) {
+        console.error('Erreur soumission:', error);
+      }
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
-      name: '',
-      biography: '', // On garde biography dans le formulaire
-      genre: '',
-      popularity: 0,
+      name: artist?.name || '',
+      biography: artist?.description || '',
+      genre: artist?.genre || '',
+      popularity: artist?.popularity || 0,
     },
+    enableReinitialize: true,
     validationSchema: Yup.object({
       name: Yup.string()
         .required(t('artists.form.validation.nameRequired'))
         .min(2, t('artists.form.validation.nameMin')),
-      biography: Yup.string() // Validation pour biography
+      biography: Yup.string()
         .required(t('artists.form.validation.biographyRequired'))
         .min(10, t('artists.form.validation.biographyMin')),
       genre: Yup.string()
         .required(t('artists.form.validation.genreRequired'))
         .min(2, t('artists.form.validation.genreMin')),
     }),
-    onSubmit: (values) => {
-      mutation.mutate(values);
-    },
+    onSubmit: handleSubmit
   });
 
   useEffect(() => {
     if (artist) {
       formik.setValues({
         name: artist.name || '',
-        biography: artist.description || '', // Conversion de description en biography
+        biography: artist.description || '',
         genre: artist.genre || '',
         popularity: artist.popularity || 0,
       });
     }
   }, [artist]);
 
-  if (isEditMode && isLoading) {
+  if (isLoadingArtist) {
     return (
       <div className="loading-state">
         <div className="spinner"></div>
-        <p>{t('artists.loading')}</p>
+        <p>{t('common.loading')}</p>
       </div>
     );
   }
@@ -131,6 +168,7 @@ function ArtistForm() {
             type="button" 
             className="btn btn--secondary"
             onClick={() => navigate('/artists')}
+            disabled={mutation.isLoading}
           >
             {t('artists.form.cancel')}
           </button>
@@ -139,7 +177,7 @@ function ArtistForm() {
             className="btn btn--primary"
             disabled={mutation.isLoading}
           >
-            {t('artists.form.submit')}
+            {mutation.isLoading ? t('common.loading') : t('artists.form.submit')}
           </button>
         </div>
       </form>
