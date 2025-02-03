@@ -225,7 +225,7 @@ function RoleList() {
             <FaSearch />
             <input
               type="text"
-              placeholder={t('roles.search')}
+              placeholder={t('roles.search.placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -233,8 +233,9 @@ function RoleList() {
           <button
             className="btn btn--secondary"
             onClick={() => setShowStats(!showStats)}
+            title={t('roles.toggle.stats')}
           >
-            <FaChartLine />
+            <FaChartLine />{' '}
             <span>{t('roles.toggleStats')}</span>
           </button>
         </div>

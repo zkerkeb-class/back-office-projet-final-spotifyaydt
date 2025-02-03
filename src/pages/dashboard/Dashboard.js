@@ -107,17 +107,18 @@ function Dashboard() {
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
+    if (!over) return;
+
     if (active.id !== over.id) {
-      const oldIndex = config.kpis.findIndex((kpi) => kpi.id === active.id);
-      const newIndex = config.kpis.findIndex((kpi) => kpi.id === over.id);
+      setConfig((prevConfig) => {
+        const oldIndex = prevConfig.kpis.findIndex((kpi) => kpi.id === active.id);
+        const newIndex = prevConfig.kpis.findIndex((kpi) => kpi.id === over.id);
 
-      const newConfig = {
-        ...config,
-        kpis: arrayMove(config.kpis, oldIndex, newIndex),
-      };
-
-      setConfig(newConfig);
-      localStorage.setItem('kpiConfig', JSON.stringify(newConfig));
+        return {
+          ...prevConfig,
+          kpis: arrayMove(prevConfig.kpis, oldIndex, newIndex),
+        };
+      });
     }
   };
 
