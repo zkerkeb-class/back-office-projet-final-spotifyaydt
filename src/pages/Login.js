@@ -72,16 +72,6 @@ function Login() {
             {isLoading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
-
-        {/* Aide pour le développement */}
-        <div className="login-help">
-          <p>Comptes de test :</p>
-          <ul>
-            <li>Admin: admin@test.com / admin123</li>
-            <li>Editor: editor@test.com / editor123</li>
-            <li>Viewer: viewer@test.com / viewer123</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
