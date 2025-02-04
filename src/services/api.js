@@ -2,7 +2,8 @@ import { openDB } from 'idb';
 import { mockUsers } from '../mocks/auth';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+//const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = 'https://back-end-projet-final-spotifyaydt.onrender.com/api';
 const DB_NAME = 'spotifyOfflineDB';
 const DB_VERSION = 1;
 const PENDING_STORE = 'pendingOperations';
