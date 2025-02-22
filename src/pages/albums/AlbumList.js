@@ -107,27 +107,6 @@ function AlbumList() {
 
   // Regrouper tous les useEffect au début
   useEffect(() => {
-    if (!isLoadingAlbums && !isLoadingTracks && albums && Array.isArray(albums)) {
-      console.log('=== État des données ===');
-      console.log('Albums chargés:', albums);
-      console.log('Tracks chargés:', allTracks);
-      
-      albums.forEach(album => {
-        if (album.tracks && Array.isArray(album.tracks)) {
-          console.log(`Données des pistes pour l'album ${album.title}:`, 
-            album.tracks.map(track => ({
-              id: track._id,
-              title: track.title,
-              audioUrl: track.audioUrl,
-              s3Key: track.s3Key
-            }))
-          );
-        }
-      });
-    }
-  }, [albums, allTracks, isLoadingAlbums, isLoadingTracks]);
-
-  useEffect(() => {
     if (searchTerm.trim() && albums && Array.isArray(albums)) {
       const allTitles = albums
         .map(album => album.title)
@@ -578,9 +557,6 @@ function AlbumList() {
                     <td colSpan={7}>
                       <div className="album-tracks">
                         <h3>Pistes de {album.title}</h3>
-                        {console.log('=== Données de l\'album sélectionné ===', selectedAlbum)}
-                        {console.log('Pistes de l\'album avant enrichissement:', album.tracks)}
-                        
                         <TrackListComponent 
                           tracks={enrichTracksWithAudioUrls(album.tracks)} 
                           showAlbum={false} 

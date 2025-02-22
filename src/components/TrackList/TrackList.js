@@ -7,16 +7,6 @@ import './TrackList.scss';
 const TrackListComponent = ({ tracks, showAlbum }) => {
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [audioElement, setAudioElement] = useState(null);
-  console.log('tracks in TrackListComponent', tracks);
-
-  useEffect(() => {
-    console.log('Données des pistes dans le composant TrackList:', tracks.map(track => ({
-      id: track._id,
-      title: track.title,
-      audioUrl: track.audioUrl,
-      s3Key: track.s3Key
-    })));
-  }, [tracks]);
 
   useEffect(() => {
     if (audioElement) {
@@ -56,10 +46,12 @@ const TrackListComponent = ({ tracks, showAlbum }) => {
       const audio = new Audio(track.audioUrl);
       
       audio.onerror = () => {
+        console.error('Erreur de lecture audio');
         toast.error("Impossible de lire cette piste");
       };
 
       audio.play().catch(error => {
+        console.error('Erreur lors de la lecture:', error);
         toast.error("Impossible de lire cette piste");
       });
 
