@@ -229,6 +229,8 @@ i18n
           "tracks": {
             "title": "Tracks Management",
             "add": "Add Track",
+            "search": "Search for a track...",
+            "recentSearches": "Recent searches",
             "table": {
               "title": "Title",
               "artist": "Artist",
@@ -475,6 +477,8 @@ i18n
           "tracks": {
             "title": "Gestion des pistes",
             "add": "Ajouter une piste",
+            "search": "Rechercher une piste...",
+            "recentSearches": "Recherches récentes",
             "table": {
               "title": "Titre",
               "artist": "Artiste",
@@ -721,6 +725,8 @@ i18n
           "tracks": {
             "title": "إدارة المقاطع",
             "add": "إضافة مقطع",
+            "search": "البحث عن مقطع...",
+            "recentSearches": "عمليات البحث الأخيرة",
             "table": {
               "title": "العنوان",
               "artist": "الفنان",
