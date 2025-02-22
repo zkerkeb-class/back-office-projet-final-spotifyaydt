@@ -1,24 +1,28 @@
 @import '../../styles/variables';
 @import '../../styles/mixins';
 
+.metrics-card-container {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
 .metrics-card {
   background: rgba($secondary-color, 0.3);
-  border-radius: $border-radius;
-  padding: $spacing-md;
+  border-radius: 8px;
+  padding: 1rem;
   @include flex(row, flex-start, center);
-  gap: $spacing-md;
-  transition: all $transition-duration ease;
+  gap: 1rem;
+  transition: all 0.3s ease;
   cursor: move;
-  width: 300px;
-  margin-bottom: $spacing-sm;
+  margin-bottom: 1rem;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: $box-shadow-lg;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   &__icon {
-    font-size: $font-size-lg;
+    font-size: 1.5rem;
     opacity: 0.8;
   }
 
@@ -27,16 +31,32 @@
   }
 
   &__title {
-    font-size: $font-size-sm;
+    font-size: 0.875rem;
     color: rgba($text-color, 0.8);
-    margin: 0 0 $spacing-xs;
+    margin: 0 0 0.5rem;
   }
 
   &__value {
-    font-size: $font-size-md;
+    font-size: 1.25rem;
     font-weight: 600;
     @include flex(row, flex-start, center);
-    gap: $spacing-sm;
+    gap: 0.5rem;
+
+    .trend {
+      font-size: 0.875rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+
+      &.up {
+        color: #4caf50;
+        background: rgba(76, 175, 80, 0.1);
+      }
+
+      &.down {
+        color: #ff4444;
+        background: rgba(255, 68, 68, 0.1);
+      }
+    }
   }
 
   &.alert {
@@ -51,4 +71,20 @@
       color: $error-color;
     }
   }
+}
+
+.metric-chart-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.metrics-charts-section {
+  margin-top: 20px;
+  background: var(--background-elevation-1, #ffffff);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 } 

@@ -10,6 +10,8 @@ import { useAuditLog } from '../../contexts/AuditLogContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useOfflineMode } from '../../hooks/useOfflineMode';
 import { toast } from 'react-hot-toast';
+import TrackListComponent from '../../components/TrackList/TrackList';
+import ErrorState from '../../components/ErrorState/ErrorState';
 import './AlbumList.scss';
 
 const SEARCH_HISTORY_KEY = 'albumSearchHistory';
@@ -19,40 +21,37 @@ function AlbumList() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { canEdit, canManage } = usePermissions();
+  const { addLog } = useAuditLog();
+  const { user } = useAuth();
+  const { isOnline } = useOfflineMode();
+
+  // Définir tous les states au début
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [searchHistory, setSearchHistory] = useState(() => {
     const saved = localStorage.getItem(SEARCH_HISTORY_KEY);
     return saved ? JSON.parse(saved) : [];
   });
 
-  // États pour les filtres
-  const [filters, setFilters] = useState({
-    artist: '',
-    genre: '',
-    yearStart: '',
-    yearEnd: '',
-    durationMin: '',
-    durationMax: '',
-    popularity: '',
-    playlist: ''
-  });
-  
-  const [showFilters, setShowFilters] = useState(false);
-
-  const [sorting, setSorting] = useState({
-    field: 'title',
-    direction: 'asc'
-  });
-
-  const { data: albums, isLoading, error, refetch } = useQuery({
+  // Définir tous les hooks de requête
+  const { data: albums, isLoading: isLoadingAlbums, error, refetch } = useQuery({
     queryKey: ['albums'],
     queryFn: () => api.get('/albums'),
     retry: 2,
     staleTime: 30000,
     refetchOnWindowFocus: false,
+  });
+
+  const { data: allTracks, isLoading: isLoadingTracks } = useQuery({
+    queryKey: ['tracks'],
+    queryFn: () => api.get('/tracks'),
+    staleTime: 30000,
   });
 
   const { data: artists } = useQuery({
@@ -65,27 +64,50 @@ function AlbumList() {
     queryFn: () => api.get('/playlists')
   });
 
-  const { canEdit, canManage } = usePermissions();
-  const { addLog } = useAuditLog();
-  const { user } = useAuth();
-  const { isOnline } = useOfflineMode();
+  // Définir le hook useMutation au début
+  const deleteMutation = useMutation({
+    mutationFn: (id) => api.deleteAlbum(id),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['albums'], (old) => {
+        const albums = old || [];
+        return albums.filter(album => album.id !== data.id);
+      });
 
-  // Gestion de l'historique des recherches
-  const addToHistory = (term) => {
-    if (!term.trim()) return;
-    
-    const newHistory = [
-      term,
-      ...searchHistory.filter(item => item !== term)
-    ].slice(0, MAX_HISTORY_ITEMS);
-    
-    setSearchHistory(newHistory);
-    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
-  };
+      if (!data._isOffline) {
+        queryClient.invalidateQueries({ queryKey: ['albums'] });
+      }
 
-  // Auto-complétion intelligente
+      toast.success(data._isOffline 
+        ? "Album supprimé en mode hors ligne. La suppression sera synchronisée une fois la connexion rétablie"
+        : "Album supprimé avec succès"
+      );
+    },
+    onError: (error) => {
+      console.error('Erreur lors de la suppression:', error);
+      toast.error("Erreur lors de la suppression de l'album");
+    }
+  });
+
+  // Définir les states qui dépendent d'autres states
+  const [filters, setFilters] = useState({
+    artist: '',
+    genre: '',
+    yearStart: '',
+    yearEnd: '',
+    durationMin: '',
+    durationMax: '',
+    popularity: '',
+    playlist: ''
+  });
+
+  const [sorting, setSorting] = useState({
+    field: 'title',
+    direction: 'asc'
+  });
+
+  // Regrouper tous les useEffect au début
   useEffect(() => {
-    if (searchTerm.trim() && albums) {
+    if (searchTerm.trim() && albums && Array.isArray(albums)) {
       const allTitles = albums
         .map(album => album.title)
         .filter(Boolean);
@@ -112,131 +134,39 @@ function AlbumList() {
     }
   }, [searchTerm, albums]);
 
-  // Recherche phonétique améliorée
-  const handleSearch = (term) => {
-    const searchTerm = term.trim();
-    if (!searchTerm || !albums) {
-      setSearchResults(null);
-      return;
-    }
+  // Gestion du chargement
+  if (isLoadingAlbums || isLoadingTracks) {
+    return <div className="loading-state">Chargement...</div>;
+  }
 
-    const results = albums.filter(album => {
-      const titleMatch = album.title && 
-        phoneticSearch(searchTerm, [album.title]).length > 0;
-        
-      const artistMatch = album.artist?.name && 
-        phoneticSearch(searchTerm, [album.artist.name]).length > 0;
-        
-      return titleMatch || artistMatch;
-    });
+  // Gestion des erreurs
+  if (error) {
+    return <ErrorState error={error} onRetry={refetch} />;
+  }
 
-    setSearchResults(results);
-    if (searchTerm) {
-      addToHistory(searchTerm);
-    }
+  // Vérification des données
+  if (!albums || !Array.isArray(albums)) {
+    return <ErrorState error={{ message: "Aucun album trouvé" }} onRetry={refetch} />;
+  }
+
+  // Gestion de l'historique des recherches
+  const addToHistory = (term) => {
+    if (!term.trim()) return;
+    
+    const newHistory = [
+      term,
+      ...searchHistory.filter(item => item !== term)
+    ].slice(0, MAX_HISTORY_ITEMS);
+    
+    setSearchHistory(newHistory);
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
   };
 
+  // Auto-complétion intelligente
   const handleSuggestionClick = (suggestion) => {
     setSearchTerm(suggestion);
     handleSearch(suggestion);
     setShowSuggestions(false);
-  };
-
-  const deleteMutation = useMutation({
-    mutationFn: (id) => api.deleteAlbum(id),
-    onSuccess: (data) => {
-      // Mise à jour optimiste du cache
-      queryClient.setQueryData(['albums'], (old) => {
-        const albums = old || [];
-        return albums.filter(album => album.id !== data.id);
-      });
-
-      if (!data._isOffline) {
-        queryClient.invalidateQueries({ queryKey: ['albums'] });
-      }
-
-      toast.success(data._isOffline 
-        ? "Album supprimé en mode hors ligne. La suppression sera synchronisée une fois la connexion rétablie"
-        : "Album supprimé avec succès"
-      );
-    },
-    onError: (error) => {
-      console.error('Erreur lors de la suppression:', error);
-      toast.error("Erreur lors de la suppression de l'album");
-    }
-  });
-
-  const handleDelete = async (album) => {
-    if (window.confirm(t('albums.confirmDelete'))) {
-      try {
-        await api.delete(`/albums/${album._id}`);
-        
-        // Ajouter l'entrée dans le journal d'audit
-        addLog({
-          action: 'ALBUM_DELETE',
-          user: user?.email || 'Système',
-          target: `Album: ${album.title}`,
-          details: `Suppression de l'album ${album.title}`,
-          severity: 'high'
-        });
-
-        // Rafraîchir la liste des albums
-        queryClient.invalidateQueries(['albums']);
-      } catch (error) {
-        toast.error(error.message);
-      }
-    }
-  };
-
-  // Fonction pour appliquer les filtres
-  const getFilteredAlbums = () => {
-    if (!albums) return [];
-
-    return albums.filter(album => {
-      // Filtre par artiste
-      if (filters.artist && album.artist?._id !== filters.artist) {
-        return false;
-      }
-
-      // Filtre par genre
-      if (filters.genre && album.genre !== filters.genre) {
-        return false;
-      }
-
-      // Filtre par année
-      const albumYear = new Date(album.releaseDate).getFullYear();
-      if (filters.yearStart && albumYear < parseInt(filters.yearStart)) {
-        return false;
-      }
-      if (filters.yearEnd && albumYear > parseInt(filters.yearEnd)) {
-        return false;
-      }
-
-      // Filtre par durée
-      const totalDuration = album.tracks?.reduce((acc, track) => acc + track.duration, 0) || 0;
-      if (filters.durationMin && totalDuration < parseInt(filters.durationMin)) {
-        return false;
-      }
-      if (filters.durationMax && totalDuration > parseInt(filters.durationMax)) {
-        return false;
-      }
-
-      // Filtre par popularité
-      if (filters.popularity && album.popularity < parseInt(filters.popularity)) {
-        return false;
-      }
-
-      // Filtre par playlist
-      if (filters.playlist) {
-        const isInPlaylist = playlists?.some(playlist => 
-          playlist._id === filters.playlist && 
-          playlist.tracks?.some(track => track.album === album._id)
-        );
-        if (!isInPlaylist) return false;
-      }
-
-      return true;
-    });
   };
 
   const handleFilterChange = (name, value) => {
@@ -256,6 +186,42 @@ function AlbumList() {
       durationMax: '',
       popularity: '',
       playlist: ''
+    });
+  };
+
+  const getFilteredAlbums = () => {
+    if (!albums) return [];
+
+    return albums.filter(album => {
+      // Filtre par artiste
+      if (filters.artist && (!album.artist || !album.artist.name.toLowerCase().includes(filters.artist.toLowerCase()))) {
+        return false;
+      }
+
+      // Filtre par genre
+      if (filters.genre && album.genre !== filters.genre) {
+        return false;
+      }
+
+      // Filtre par année
+      const albumYear = new Date(album.releaseDate).getFullYear();
+      if (filters.yearStart && albumYear < parseInt(filters.yearStart)) {
+        return false;
+      }
+      if (filters.yearEnd && albumYear > parseInt(filters.yearEnd)) {
+        return false;
+      }
+
+      // Filtre par nombre de pistes
+      const trackCount = album.tracks?.length || 0;
+      if (filters.durationMin && trackCount < parseInt(filters.durationMin)) {
+        return false;
+      }
+      if (filters.durationMax && trackCount > parseInt(filters.durationMax)) {
+        return false;
+      }
+
+      return true;
     });
   };
 
@@ -319,14 +285,41 @@ function AlbumList() {
   // Appliquer le tri après les filtres
   const displayedAlbums = sortData(searchResults || filteredAlbums || []);
 
-  if (isLoading) return (
-    <div className="loading-state">
-      <div className="spinner"></div>
-      <p>{t('albums.loading')}</p>
-    </div>
-  );
+  const handleRowClick = (album) => {
+    if (selectedAlbum && selectedAlbum._id === album._id) {
+      // Si l'album est déjà sélectionné, on le désélectionne
+      setSelectedAlbum(null);
+    } else {
+      // On utilise directement les données de l'album sans faire de requête
+      setSelectedAlbum(album);
+    }
+  };
 
-  if (error) return <ErrorState error={error} onRetry={refetch} />;
+  // Enrichir les pistes avec les URLs audio correctes
+  const enrichTracksWithAudioUrls = (albumTracks) => {
+    if (!albumTracks || !allTracks) return [];
+
+    return albumTracks.map(albumTrack => {
+      const matchingTrack = allTracks.find(t => t._id === albumTrack._id);
+      
+      if (matchingTrack) {
+        return {
+          ...albumTrack,
+          audioUrl: matchingTrack.audioUrl
+        };
+      } else {
+        // Fallback sur la recherche par titre si nécessaire
+        const matchByTitle = allTracks.find(t => t.title === albumTrack.title);
+        if (matchByTitle) {
+          return {
+            ...albumTrack,
+            audioUrl: matchByTitle.audioUrl
+          };
+        }
+        return albumTrack;
+      }
+    });
+  };
 
   return (
     <div className="album-list">
@@ -511,47 +504,68 @@ function AlbumList() {
           </thead>
           <tbody>
             {displayedAlbums.map(album => (
-              <tr key={album._id}>
-                <td className="image-cell">
-                  <div className="album-cover">
-                    {album.coverImage ? (
-                      <img src={album.coverImage} alt={album.title} />
-                    ) : (
-                      <div className="album-cover-placeholder">
-                        <FaMusic />
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td>{album.title}</td>
-                <td>{album.artist?.name || t('albums.unknownArtist')}</td>
-                <td>{album.genre}</td>
-                <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
-                <td>{album.tracks?.length || 0}</td>
-                {(canManage() || canEdit()) && (
-                  <td className="actions">
-                    {canEdit() && (
-                      <Link 
-                        to={`/albums/edit/${album._id}`}
-                        className="btn btn--icon"
-                        aria-label={t('albums.edit')}
-                      >
-                        <FaEdit />
-                      </Link>
-                    )}
-                    {canManage() && (
-                      <button 
-                        className="btn btn--icon btn--danger"
-                        onClick={() => handleDelete(album)}
-                        aria-label={t('albums.delete')}
-                        disabled={deleteMutation.isLoading}
-                      >
-                        <FaTrash />
-                      </button>
-                    )}
+              <React.Fragment key={album._id}>
+                <tr 
+                  onClick={() => handleRowClick(album)}
+                  className={`album-row ${selectedAlbum?._id === album._id ? 'selected' : ''}`}
+                >
+                  <td className="image-cell">
+                    <div className="album-cover">
+                      {album.coverImage ? (
+                        <img src={album.coverImage} alt={album.title} />
+                      ) : (
+                        <div className="album-cover-placeholder">
+                          <FaMusic />
+                        </div>
+                      )}
+                    </div>
                   </td>
+                  <td>{album.title}</td>
+                  <td>{album.artist?.name || t('albums.unknownArtist')}</td>
+                  <td>{album.genre}</td>
+                  <td>{new Date(album.releaseDate).toLocaleDateString()}</td>
+                  <td>{album.tracks?.length || 0}</td>
+                  {(canManage() || canEdit()) && (
+                    <td className="actions">
+                      {canEdit() && (
+                        <Link 
+                          to={`/albums/edit/${album._id}`}
+                          className="btn btn--icon"
+                          aria-label={t('albums.edit')}
+                        >
+                          <FaEdit />
+                        </Link>
+                      )}
+                      {canManage() && (
+                        <button 
+                          className="btn btn--icon btn--danger"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(album);
+                          }}
+                          aria-label={t('albums.delete')}
+                          disabled={deleteMutation.isLoading}
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+                {selectedAlbum?._id === album._id && (
+                  <tr className="track-list-row">
+                    <td colSpan={7}>
+                      <div className="album-tracks">
+                        <h3>Pistes de {album.title}</h3>
+                        <TrackListComponent 
+                          tracks={enrichTracksWithAudioUrls(album.tracks)} 
+                          showAlbum={false} 
+                        />
+                      </div>
+                    </td>
+                  </tr>
                 )}
-              </tr>
+              </React.Fragment>
             ))}
           </tbody>
         </table>

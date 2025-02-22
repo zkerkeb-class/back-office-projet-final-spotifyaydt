@@ -2,8 +2,8 @@ import { openDB } from 'idb';
 import { mockUsers } from '../mocks/auth';
 import axios from 'axios';
 
-//const API_BASE_URL = 'http://localhost:3001/api';
-const API_BASE_URL = 'https://back-end-projet-final-spotifyaydt.onrender.com/api';
+const API_BASE_URL = 'http://localhost:3001/api';
+// const API_BASE_URL = 'https://back-end-projet-final-spotifyaydt.onrender.com/api';
 const DB_NAME = 'spotifyOfflineDB';
 const DB_VERSION = 1;
 const PENDING_STORE = 'pendingOperations';
@@ -135,6 +135,11 @@ class Api {
   constructor() {
     this.lastRequestTime = 0;
     this.minRequestInterval = 1000; // 1 seconde minimum entre les requêtes
+    this.instance = axios.create({
+      baseURL: API_BASE_URL,
+      headers: defaultHeaders,
+      credentials: 'include'
+    });
   }
 
   async throttleRequest() {
@@ -448,6 +453,27 @@ class Api {
   async syncOfflineData() {
     if (navigator.onLine) {
       await syncPendingOperations();
+    }
+  }
+
+  async getAlbumById(albumId) {
+    try {
+      if (!albumId) {
+        throw new Error("ID d'album non valide");
+      }
+      
+      const response = await this.instance.get(`/albums/${albumId}`);
+      
+      if (!response.data) {
+        throw new Error("Album non trouvé");
+      }
+      
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        throw new Error("Album non trouvé");
+      }
+      throw new Error(`Erreur lors de la récupération de l'album: ${error.message}`);
     }
   }
 }

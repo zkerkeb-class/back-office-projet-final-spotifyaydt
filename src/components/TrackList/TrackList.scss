@@ -5,6 +5,64 @@
   @include flex(column);
   gap: $spacing-sm;
   margin-top: $spacing-md;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: $spacing-sm $spacing-md;
+    text-align: left;
+  }
+
+  .play-button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: $spacing-xs;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: rgba(var(--primary-color-rgb), 0.1);
+      color: var(--primary-color);
+    }
+
+    &.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: transparent;
+        color: var(--text-color);
+      }
+    }
+
+    svg {
+      font-size: 1rem;
+    }
+  }
+
+  tr.playing {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+
+    .play-button {
+      color: var(--primary-color);
+    }
+  }
+
+  tr:hover {
+    background-color: rgba(var(--secondary-color-rgb), 0.05);
+
+    .play-button {
+      opacity: 1;
+    }
+  }
 }
 
 .track-item {
@@ -66,5 +124,32 @@
 
   &:hover .remove-track {
     opacity: 1;
+  }
+}
+
+.preview-indicator {
+  margin-left: $spacing-sm;
+  color: var(--primary-color);
+  opacity: 0.5;
+  font-size: 0.8em;
+}
+
+.btn {
+  &--icon {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: $spacing-xs;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: rgba(var(--primary-color-rgb), 0.1);
+      color: var(--primary-color);
+    }
   }
 } 
