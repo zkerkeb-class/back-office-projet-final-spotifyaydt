@@ -85,6 +85,25 @@
           opacity: 1;
         }
       }
+
+      .album-row {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: rgba($secondary-color, 0.2);
+        }
+
+        &.selected {
+          background-color: rgba($primary-color, 0.1);
+          border-left: 3px solid $primary-color;
+        }
+      }
+
+      .actions {
+        position: relative;
+        z-index: 1;
+      }
     }
   }
 }
@@ -245,4 +264,117 @@
 .header-actions {
   @include flex(row);
   gap: $spacing-md;
+}
+
+.album-list-page {
+  padding: 20px;
+
+  h1 {
+    margin-bottom: 20px;
+  }
+}
+
+.albums-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.album-card {
+  background: var(--background-elevation-1);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  &.selected {
+    border: 2px solid var(--primary-color);
+    background: var(--background-elevation-2);
+  }
+
+  .album-info {
+    h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.2rem;
+      color: var(--text-primary);
+    }
+
+    .artist-name {
+      color: var(--text-secondary);
+      margin: 0 0 5px 0;
+      font-weight: 500;
+    }
+
+    .genre {
+      color: var(--text-secondary);
+      margin: 0 0 5px 0;
+      font-size: 0.9rem;
+    }
+
+    .release-date {
+      color: var(--text-tertiary);
+      margin: 0;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.album-details {
+  margin-top: $spacing-lg;
+  padding: $spacing-lg;
+  background: rgba($secondary-color, 0.1);
+  border-radius: $border-radius;
+  
+  h2 {
+    margin-bottom: $spacing-md;
+    font-size: $font-size-lg;
+    color: $text-color;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: var(--text-secondary);
+}
+
+.track-list-row {
+  background-color: rgba($secondary-color, 0.05);
+
+  td {
+    padding: 0 !important;
+  }
+
+  .album-tracks {
+    padding: $spacing-md $spacing-xl;
+
+    h3 {
+      margin-bottom: $spacing-md;
+      font-size: $font-size-md;
+      color: $text-color;
+    }
+  }
+}
+
+.track-list-row {
+  transition: all 0.3s ease-in-out;
+  
+  &.entering {
+    max-height: 0;
+    opacity: 0;
+  }
+  
+  &.entered {
+    max-height: 1000px;
+    opacity: 1;
+  }
 } 

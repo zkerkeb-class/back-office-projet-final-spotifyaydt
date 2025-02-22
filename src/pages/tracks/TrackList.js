@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { FaPlay, FaPause, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
@@ -17,6 +17,15 @@ const TrackList = () => {
     queryKey: ['tracks'],
     queryFn: () => api.get('/tracks')
   });
+
+  useEffect(() => {
+    console.log('Données des pistes dans la page des pistes:', tracks?.map(track => ({
+      id: track._id,
+      title: track.title,
+      audioUrl: track.audioUrl,
+      s3Key: track.s3Key
+    })));
+  }, [tracks]);
 
   const handlePlayPause = (track) => {
     if (currentlyPlaying === track._id) {

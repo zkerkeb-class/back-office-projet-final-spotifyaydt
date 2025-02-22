@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { phoneticSearch } from '../../services/phoneticSearch';
 import { api } from '../../services/api';
 import './ArtistList.scss';
-import { ErrorState } from '../../components/ErrorState/ErrorState';
+import ErrorState from '../../components/ErrorState/ErrorState';
 import { usePermissions } from '../../components/Layout/Layout';
 
 const SEARCH_HISTORY_KEY = 'artistSearchHistory';

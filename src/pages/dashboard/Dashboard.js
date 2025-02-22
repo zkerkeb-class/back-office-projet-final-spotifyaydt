@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { ErrorState } from '../../components/ErrorState/ErrorState';
+import ErrorState from '../../components/ErrorState/ErrorState';
 import { MetricsCard } from '../../components/MetricsCard/MetricsCard';
 import { FaCog } from 'react-icons/fa';
 import { KPIConfig } from '../../components/KPIConfig/KPIConfig';

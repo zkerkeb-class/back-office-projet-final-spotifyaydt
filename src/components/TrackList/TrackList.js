@@ -1,89 +1,122 @@
-import React from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { FaGripVertical, FaTrash, FaClock } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaPlay, FaPause, FaVolumeUp } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
+import { api } from '../../services/api';
 import './TrackList.scss';
 
-function TrackList({ tracks, onTracksChange }) {
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
+const TrackListComponent = ({ tracks, showAlbum }) => {
+  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const [audioElement, setAudioElement] = useState(null);
+  console.log('tracks in TrackListComponent', tracks);
 
-    const items = Array.from(tracks);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+  useEffect(() => {
+    console.log('Données des pistes dans le composant TrackList:', tracks.map(track => ({
+      id: track._id,
+      title: track.title,
+      audioUrl: track.audioUrl,
+      s3Key: track.s3Key
+    })));
+  }, [tracks]);
 
-    onTracksChange(items);
+  useEffect(() => {
+    if (audioElement) {
+      audioElement.onended = () => {
+        setCurrentlyPlaying(null);
+        setAudioElement(null);
+      };
+
+      audioElement.onerror = () => {
+        console.error('Erreur de lecture audio');
+        toast.error("Impossible de lire cette piste");
+        setCurrentlyPlaying(null);
+        setAudioElement(null);
+      };
+    }
+  }, [audioElement]);
+
+  const getAudioUrl = (track) => {
+    if (track.audioUrl) {
+      return track.audioUrl;
+    }
+    if (track.s3Key) {
+      return `https://d897w75kgpkpm.cloudfront.net/${track.s3Key}`;
+    }
+    return null;
   };
 
-  const handleTrackChange = (index, field, value) => {
-    const newTracks = tracks.map((track, i) => 
-      i === index ? { ...track, [field]: value } : track
-    );
-    onTracksChange(newTracks);
-  };
+  const handlePlayPause = (track) => {
+    if (currentlyPlaying === track._id) {
+      audioElement.pause();
+      setCurrentlyPlaying(null);
+    } else {
+      if (audioElement) {
+        audioElement.pause();
+      }
 
-  const handleRemoveTrack = (index) => {
-    const newTracks = tracks.filter((_, i) => i !== index);
-    onTracksChange(newTracks);
+      const audio = new Audio(track.audioUrl);
+      
+      audio.onerror = () => {
+        toast.error("Impossible de lire cette piste");
+      };
+
+      audio.play().catch(error => {
+        toast.error("Impossible de lire cette piste");
+      });
+
+      setAudioElement(audio);
+      setCurrentlyPlaying(track._id);
+    }
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="tracks">
-        {(provided) => (
-          <div 
-            {...provided.droppableProps} 
-            ref={provided.innerRef}
-            className="track-list"
-          >
-            {tracks.map((track, index) => (
-              <Draggable 
-                key={track.id} 
-                draggableId={track.id.toString()} 
-                index={index}
-              >
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    className={`track-item ${snapshot.isDragging ? 'dragging' : ''}`}
-                  >
-                    <div {...provided.dragHandleProps} className="drag-handle">
-                      <FaGripVertical />
-                    </div>
-                    <div className="track-number">{index + 1}</div>
-                    <input
-                      type="text"
-                      value={track.title}
-                      onChange={(e) => handleTrackChange(index, 'title', e.target.value)}
-                      placeholder="Titre de la piste"
-                      className="track-title"
-                    />
-                    <div className="track-duration">
-                      <FaClock />
-                      <input
-                        type="text"
-                        value={track.duration}
-                        onChange={(e) => handleTrackChange(index, 'duration', e.target.value)}
-                        placeholder="00:00"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="remove-track"
-                      onClick={() => handleRemoveTrack(index)}
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div className="track-list">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>#</th>
+            <th>Titre</th>
+            <th>Durée</th>
+            {showAlbum && <th>Album</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {tracks.map((track, index) => (
+            <tr 
+              key={track._id || index}
+              className={currentlyPlaying === track._id ? 'playing' : ''}
+            >
+              <td>
+                <button 
+                  className="btn btn--icon"
+                  onClick={() => handlePlayPause(track)}
+                  aria-label={currentlyPlaying === track._id ? "Pause" : "Lecture"}
+                >
+                  {currentlyPlaying === track._id ? <FaPause /> : <FaPlay />}
+                </button>
+              </td>
+              <td>{index + 1}</td>
+              <td>
+                {track.title}
+                <span className="preview-indicator" title="Audio disponible">
+                  <FaVolumeUp />
+                </span>
+              </td>
+              <td>{formatDuration(track.duration)}</td>
+              {showAlbum && <td>{track.album?.title}</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
-}
+};
 
-export default TrackList; 
+const formatDuration = (duration) => {
+  if (!duration) return '0:00';
+  const minutes = Math.floor(duration / 60);
+  const seconds = duration % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
+export default TrackListComponent; 
