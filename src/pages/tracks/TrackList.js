@@ -8,12 +8,13 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { api } from '../../services/api';
 import { usePermissions } from '../../components/Layout/Layout';
 import { phoneticSearch } from '../../services/phoneticSearch';
+import { toast } from 'react-hot-toast';
 import './TrackList.scss';
 
 const SEARCH_HISTORY_KEY = 'trackSearchHistory';
 const MAX_HISTORY_ITEMS = 5;
 
-const DraggableTrackRow = ({ track, index, moveTrack, handlePlayPause, currentlyPlaying, canEdit, canManage, formatDuration }) => {
+const DraggableTrackRow = ({ track, index, moveTrack, handlePlayPause, currentlyPlaying, canEdit, canManage, formatDuration, onEdit, onDelete }) => {
   const [{ isDragging }, drag] = useDrag({
     type: 'track',
     item: { 
@@ -56,12 +57,24 @@ const DraggableTrackRow = ({ track, index, moveTrack, handlePlayPause, currently
       {(canManage() || canEdit()) && (
         <td className="actions">
           {canEdit() && (
-            <button className="btn btn--icon">
+            <button 
+              className="btn btn--icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(track);
+              }}
+            >
               <FaEdit />
             </button>
           )}
           {canManage() && (
-            <button className="btn btn--icon btn--danger">
+            <button 
+              className="btn btn--icon btn--danger"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(track);
+              }}
+            >
               <FaTrash />
             </button>
           )}
@@ -94,10 +107,21 @@ const TrackList = () => {
     direction: 'asc'
   });
 
+  // Ajouter ces nouveaux states
+  const [localTracks, setLocalTracks] = useState(null);
+  const [editingTrack, setEditingTrack] = useState(null);
+
   const { data: tracks, isLoading } = useQuery({
     queryKey: ['tracks'],
     queryFn: () => api.get('/tracks')
   });
+
+  // Initialiser localTracks avec les données de l'API
+  useEffect(() => {
+    if (tracks && !localTracks) {
+      setLocalTracks(tracks);
+    }
+  }, [tracks]);
 
   // Logique de recherche et suggestions
   useEffect(() => {
@@ -156,7 +180,70 @@ const TrackList = () => {
     setShowSuggestions(false);
   };
 
-  const displayedTracks = searchResults || orderedTracks || tracks;
+  // Fonction pour supprimer une piste localement
+  const handleDelete = (trackToDelete) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette piste ?')) {
+      const updatedTracks = localTracks.filter(track => track._id !== trackToDelete._id);
+      setLocalTracks(updatedTracks);
+      toast.success('Piste supprimée localement');
+    }
+  };
+
+  // Fonction pour modifier une piste localement
+  const handleEdit = (track) => {
+    setEditingTrack(track);
+  };
+
+  // Fonction pour sauvegarder les modifications
+  const handleSaveEdit = (updatedTrack) => {
+    const updatedTracks = localTracks.map(track => 
+      track._id === updatedTrack._id ? updatedTrack : track
+    );
+    setLocalTracks(updatedTracks);
+    setEditingTrack(null);
+    toast.success('Piste modifiée localement');
+  };
+
+  // Modal d'édition
+  const EditModal = ({ track, onSave, onCancel }) => {
+    const [editedTrack, setEditedTrack] = useState(track);
+
+    return (
+      <div className="edit-modal">
+        <div className="edit-modal__content">
+          <h3>Modifier la piste</h3>
+          <input
+            type="text"
+            value={editedTrack.title}
+            onChange={(e) => setEditedTrack({...editedTrack, title: e.target.value})}
+            placeholder="Titre"
+          />
+          <input
+            type="text"
+            value={editedTrack.artist.name}
+            onChange={(e) => setEditedTrack({
+              ...editedTrack, 
+              artist: {...editedTrack.artist, name: e.target.value}
+            })}
+            placeholder="Artiste"
+          />
+          <input
+            type="number"
+            value={editedTrack.duration}
+            onChange={(e) => setEditedTrack({...editedTrack, duration: parseInt(e.target.value)})}
+            placeholder="Durée (secondes)"
+          />
+          <div className="edit-modal__actions">
+            <button onClick={() => onSave(editedTrack)}>Sauvegarder</button>
+            <button onClick={onCancel}>Annuler</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Utiliser localTracks au lieu de tracks pour l'affichage
+  const displayedTracks = searchResults || orderedTracks || localTracks;
 
   const moveTrack = (fromIndex, toIndex) => {
     const items = Array.from(sortedTracks);
@@ -353,11 +440,21 @@ const TrackList = () => {
                 canEdit={canEdit}
                 canManage={canManage}
                 formatDuration={formatDuration}
+                onEdit={() => handleEdit(track)}
+                onDelete={() => handleDelete(track)}
               />
             ))}
           </tbody>
         </table>
       </DndProvider>
+
+      {editingTrack && (
+        <EditModal
+          track={editingTrack}
+          onSave={handleSaveEdit}
+          onCancel={() => setEditingTrack(null)}
+        />
+      )}
     </div>
   );
 };
