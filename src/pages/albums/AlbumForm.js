@@ -190,14 +190,6 @@ function AlbumForm() {
       
       <form onSubmit={formik.handleSubmit}>
         <div className="form-grid">
-          <div className="form-group full-width">
-            <ImageUpload
-              label={t('albums.form.cover')}
-              onImageChange={setAlbumCover}
-              initialImage={null}
-            />
-          </div>
-
           <div className="form-group">
             <label htmlFor="title">{t('albums.form.name')}</label>
             <input
@@ -233,22 +225,6 @@ function AlbumForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="releaseDate">{t('albums.form.year')}</label>
-            <input
-              id="releaseDate"
-              name="releaseDate"
-              type="date"
-              value={formik.values.releaseDate}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={formik.errors.releaseDate && formik.touched.releaseDate ? 'error' : ''}
-            />
-            {formik.errors.releaseDate && formik.touched.releaseDate && (
-              <span className="error-message">{formik.errors.releaseDate}</span>
-            )}
-          </div>
-
-          <div className="form-group">
             <label htmlFor="genre">{t('albums.form.genre')}</label>
             <select
               id="genre"
@@ -267,6 +243,22 @@ function AlbumForm() {
             </select>
             {formik.errors.genre && formik.touched.genre && (
               <span className="error-message">{formik.errors.genre}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="releaseDate">{t('albums.form.year')}</label>
+            <input
+              id="releaseDate"
+              name="releaseDate"
+              type="date"
+              value={formik.values.releaseDate}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={formik.errors.releaseDate && formik.touched.releaseDate ? 'error' : ''}
+            />
+            {formik.errors.releaseDate && formik.touched.releaseDate && (
+              <span className="error-message">{formik.errors.releaseDate}</span>
             )}
           </div>
 
@@ -293,11 +285,9 @@ function AlbumForm() {
               placeholder="URL de l'image de couverture"
             />
             {formik.values.coverImage && (
-              <img 
-                src={formik.values.coverImage} 
-                alt="Preview" 
-                style={{ maxWidth: '200px', marginTop: '10px' }} 
-              />
+              <div className="image-preview">
+                <img src={formik.values.coverImage} alt="Preview" />
+              </div>
             )}
           </div>
         </div>

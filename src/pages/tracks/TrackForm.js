@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import { toast } from 'react-hot-toast';
+import './TrackForm.scss';
 
 const TrackForm = () => {
   const { t } = useTranslation();
@@ -71,35 +72,41 @@ const TrackForm = () => {
 
   return (
     <div className="track-form">
-      <h1>{t('tracks.form.title.add')}</h1>
-      <form onSubmit={formik.handleSubmit} encType="multipart/form-data">
+      <div className="track-form__header">
+        <h1>{t('tracks.form.title.add')}</h1>
+      </div>
+
+      <div className="track-form__content">
         <div className="form-group">
-          <label htmlFor="file">{t('tracks.form.audioFile')}</label>
-          <input
-            type="file"
-            id="file"
-            name="audio"
-            accept="audio/*"
-            onChange={handleFileChange}
-          />
-          {formik.touched.file && formik.errors.file && (
-            <div className="error">{formik.errors.file}</div>
-          )}
+          <label>Fichier audio *</label>
+          <div className="file-upload">
+            <input 
+              type="file" 
+              accept="audio/*" 
+              id="audio-file"
+              className="file-input"
+              onChange={handleFileChange}
+            />
+            <label htmlFor="audio-file" className="file-label">
+              Choisir un fichier
+            </label>
+            <span className="file-info">Aucun fichier choisi</span>
+          </div>
         </div>
 
         <div className="form-actions">
-          <button type="button" onClick={() => navigate('/tracks')} className="btn">
-            {t('common.cancel')}
-          </button>
           <button 
-            type="submit" 
-            className="btn btn--primary" 
-            disabled={mutation.isLoading || !audioFile}
+            type="button" 
+            className="btn btn--secondary" 
+            onClick={() => navigate('/tracks')}
           >
-            {mutation.isLoading ? t('common.loading') : t('common.save')}
+            Annuler
+          </button>
+          <button type="submit" className="btn btn--primary">
+            Enregistrer
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
