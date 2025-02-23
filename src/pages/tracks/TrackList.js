@@ -147,31 +147,31 @@ const TrackList = () => {
   }, [searchTerm, tracks]);
 
   const handleSearch = (term) => {
+    setSearchTerm(term);
+    
     if (!term.trim()) {
       setSearchResults(null);
       return;
     }
 
-    const results = tracks.filter(track => {
-      const searchableText = `${track.title} ${track.artist?.name} ${track.album?.title}`.toLowerCase();
-      return searchableText.includes(term.toLowerCase()) ||
-        phoneticSearch(term, [track.title, track.artist?.name, track.album?.title]).length > 0;
+    // Sauvegarder dans l'historique
+    if (term.trim()) {
+      const newHistory = [term, ...searchHistory.filter(item => item !== term)].slice(0, MAX_HISTORY_ITEMS);
+      setSearchHistory(newHistory);
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+    }
+
+    // Effectuer la recherche
+    const results = tracks?.filter(track => {
+      const searchLower = term.toLowerCase();
+      return (
+        track.title?.toLowerCase().includes(searchLower) ||
+        track.artist?.name?.toLowerCase().includes(searchLower) ||
+        track.album?.title?.toLowerCase().includes(searchLower)
+      );
     });
 
     setSearchResults(results);
-    addToHistory(term);
-  };
-
-  const addToHistory = (term) => {
-    if (!term.trim()) return;
-    
-    const newHistory = [
-      term,
-      ...searchHistory.filter(item => item !== term)
-    ].slice(0, MAX_HISTORY_ITEMS);
-    
-    setSearchHistory(newHistory);
-    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -356,18 +356,15 @@ const TrackList = () => {
         )}
       </div>
 
-      {/* Ajout de la barre de recherche */}
-      <div className="track-list__search">
+      <div className="search-section">
         <div className="search-container">
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch(searchTerm)}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder={t('tracks.search')}
-            className="search-input"
           />
-          <FaSearch className="search-icon" onClick={() => handleSearch(searchTerm)} />
+          <FaSearch className="search-icon" />
           
           {showSuggestions && suggestions.length > 0 && (
             <div className="suggestions-dropdown">
@@ -384,17 +381,18 @@ const TrackList = () => {
           )}
         </div>
 
-        {searchHistory.length > 0 && (
+        {searchHistory.length > 0 && !searchTerm && (
           <div className="search-history">
             <h4>
-              <FaHistory /> {t('tracks.recentSearches')}
+              <FaHistory />
+              {t('tracks.recentSearches')}
             </h4>
             <div className="history-items">
               {searchHistory.map((term, index) => (
                 <button
                   key={index}
                   className="history-item"
-                  onClick={() => handleSuggestionClick(term)}
+                  onClick={() => handleSearch(term)}
                 >
                   {term}
                 </button>
