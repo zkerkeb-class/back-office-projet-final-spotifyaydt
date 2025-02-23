@@ -3,5 +3,9 @@
     "form": {
       "description": "Description"
     }
+  },
+  "tracks": {
+    "search": "Rechercher une piste...",
+    "recentSearches": "Recherches récentes"
   }
 } 

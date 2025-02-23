@@ -1,5 +1,19 @@
 {
   "common": {
     "loading": "Chargement..."
+  },
+  "tracks": {
+    "title": "Gestion des pistes",
+    "search": "Rechercher une piste...",
+    "recentSearches": "Recherches récentes",
+    "add": "Ajouter une piste",
+    "table": {
+      "title": "Titre",
+      "artist": "Artiste",
+      "album": "Album",
+      "duration": "Durée",
+      "listens": "Écoutes",
+      "actions": "Actions"
+    }
   }
 } 

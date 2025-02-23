@@ -70,7 +70,7 @@ function AlbumList() {
     onSuccess: (data) => {
       queryClient.setQueryData(['albums'], (old) => {
         const albums = old || [];
-        return albums.filter(album => album.id !== data.id);
+        return albums.filter(album => album._id !== data._id);
       });
 
       if (!data._isOffline) {
@@ -81,6 +81,16 @@ function AlbumList() {
         ? "Album supprimé en mode hors ligne. La suppression sera synchronisée une fois la connexion rétablie"
         : "Album supprimé avec succès"
       );
+
+      if (!data._isOffline && user) {
+        addLog({
+          action: "ALBUM_DELETE",
+          user: user.email,
+          target: data.title,
+          details: "Album deleted",
+          severity: "high"
+        });
+      }
     },
     onError: (error) => {
       console.error('Erreur lors de la suppression:', error);
@@ -319,6 +329,18 @@ function AlbumList() {
         return albumTrack;
       }
     });
+  };
+
+  // Ajouter la fonction handleDelete
+  const handleDelete = (album) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'album "${album.title}" ?`)) {
+      try {
+        deleteMutation.mutate(album._id);
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        toast.error("Erreur lors de la suppression de l'album");
+      }
+    }
   };
 
   return (
